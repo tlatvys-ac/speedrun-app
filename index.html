@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speedrun — the Mac video editor where Claude builds your first cut</title>
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="images/favicon.png">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<meta name="description" content="Speedrun is a free macOS video editor. Ask Claude to sync your cameras, transcribe and cut from your notes, then finish on a real multi-track timeline with Avid-style trimming, markers, keyframes and color. Hands off to Premiere as XML or EDL.">
+<meta name="theme-color" content="#1B1C26">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tlatvys-ac.github.io/speedrun-app/">
+<meta property="og:title" content="Speedrun — the Mac video editor where Claude builds your first cut">
+<meta property="og:description" content="Ask Claude to sync, transcribe and cut. Finish by hand on a real timeline, then export a movie or hand it to Premiere.">
+<meta property="og:image" content="https://tlatvys-ac.github.io/speedrun-app/images/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Speedrun logo above the editor: a two-camera interview cut on the timeline, the graded picture with a lower third in the viewer, and Claude's summary of the edit in the side panel">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+    :root {
+        --bg: #1B1C26;
+        --surface: #262835;
+        --border: #3B3E50;
+        --text: #DDDEE3;
+        --text-strong: #FFF;
+        --muted: #9EA3B4;
+        /* the logo: the play button's coral-to-pink gradient */
+        --accent: #FF7D5E;
+        --accent-hover: #FF9A80;
+        --accent-2: #FF6D78;
+        --on-accent: #2A0F0A;
+        --link: #FF9E86;
+    }
+    * { box-sizing: border-box; }
+    html { overflow-x: clip; }
+    body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, "SF Pro Text", "Helvetica Neue", "Segoe UI", sans-serif;
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+    }
+    .wrap {
+        max-width: 660px;
+        margin: 0 auto;
+        padding: 64px 24px 48px;
+    }
+    a { color: var(--link); text-underline-offset: 2px; }
+    a:hover { color: var(--accent-hover); }
+    :focus-visible {
+        outline: 2px solid var(--text-strong);
+        outline-offset: 3px;
+        border-radius: 4px;
+    }
+    h1, h2, h3, .tagline, figcaption, .media-caption { text-wrap: balance; }
+
+    /* ---------------------------------------------------------- hero */
+    .hero {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .mark { width: 112px; height: 112px; }
+    h1 {
+        margin: 14px -0.3em 0 0;   /* cancel the trailing letter-spacing so it centers */
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: 0.3em;
+        line-height: 1.2;
+        color: var(--text-strong);
+    }
+    .tagline {
+        margin: 12px 0 0;
+        color: #B9BCC8;
+        font-size: 18px;
+        max-width: 480px;
+    }
+    .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 28px;
+    }
+    .btn {
+        display: inline-block;
+        min-width: 296px;
+        text-align: center;
+        background: linear-gradient(100deg, var(--accent), var(--accent-2));
+        border-radius: 8px;
+        color: var(--on-accent);
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.4;
+        padding: 12px 32px;
+        text-decoration: none;
+        box-shadow: 0 6px 24px rgba(255, 115, 95, 0.24);
+        transition: filter 120ms, box-shadow 120ms, transform 120ms;
+        white-space: nowrap;
+    }
+    .btn:hover {
+        color: var(--on-accent);
+        filter: brightness(1.08);
+        box-shadow: 0 8px 32px rgba(255, 115, 95, 0.38);
+        transform: translateY(-1px);
+    }
+    .btn:active { transform: none; box-shadow: 0 4px 16px rgba(255, 115, 95, 0.24); }
+    .btn small {
+        display: block;
+        font-weight: 500;
+        font-size: 12px;
+        color: rgba(42, 15, 10, 0.78);
+    }
+    .hero-notes {
+        margin: 16px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    /* Hero video: an NLE needs room, so it uses the gallery's width. */
+    .hero-media {
+        position: relative;
+        flex: none;
+        width: min(1080px, calc(100vw - 48px));
+        margin-top: 44px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        background: #14151C;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+    }
+    .hero-media video, .clip video {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+    .media-caption {
+        width: min(1080px, calc(100vw - 48px));
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+    }
+    .media-caption strong { font-weight: 600; }
+    .video-toggle {
+        position: absolute;
+        right: 14px;
+        bottom: 14px;
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        background: rgba(20, 22, 30, 0.6);
+        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
+        color: #FFF;
+        cursor: pointer;
+        opacity: 0.75;
+        transition: opacity 120ms;
+    }
+    .video-toggle:hover, .video-toggle:focus-visible { opacity: 1; }
+    .video-toggle:focus-visible { border-radius: 50%; }
+    .video-toggle svg { width: 14px; height: 14px; fill: currentColor; }
+    .video-toggle .icon-play, .video-toggle.paused .icon-pause { display: none; }
+    .video-toggle.paused .icon-play { display: block; }
+
+    /* ------------------------------------------------------ sections */
+    section { margin-top: 72px; }
+    h2.divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 24px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+    }
+    h2.divider::before, h2.divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+    }
+    h3 {
+        margin: 32px 0 8px;
+        font-size: 17px;
+        font-weight: 700;
+        line-height: 1.4;
+        color: var(--text-strong);
+    }
+    p { margin: 0 0 12px; }
+    .lead { font-size: 17px; }
+    .fine { color: var(--muted); font-size: 14px; }
+    strong { color: var(--text-strong); }
+    code { font: 14px ui-monospace, "SF Mono", Menlo, monospace; color: var(--text-strong); }
+    kbd {
+        display: inline-block;
+        min-width: 1.6em;
+        padding: 0 5px;
+        border: 1px solid var(--border);
+        border-bottom-width: 2px;
+        border-radius: 4px;
+        background: #20212C;
+        font: 600 13px/1.5 -apple-system, "SF Pro Text", sans-serif;
+        color: var(--text-strong);
+        text-align: center;
+    }
+
+    /* ---------------------------------------------- feature showcase */
+    /* Video beside text, alternating sides; breaks out of the text column. */
+    .breakout {
+        width: min(1080px, calc(100vw - 48px));
+        margin-left: 50%;
+        transform: translateX(-50%);
+    }
+    .showcase { display: grid; gap: 56px; }
+    .row {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+        gap: 40px;
+        align-items: center;
+    }
+    .row.flip { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); }
+    .row.flip .clip { order: 2; }
+    .clip {
+        position: relative;
+        margin: 0;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        background: #14151C;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    }
+    .row-text h3 { margin-top: 0; font-size: 20px; }
+    .row-text p { font-size: 16px; }
+    .row-text .fine { margin-top: 12px; }
+    .eyebrow {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--accent);
+    }
+
+    /* ------------------------------------------------------- gallery */
+    .gallery h3 {
+        margin: 40px 0 14px;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        text-align: center;
+    }
+    .gallery h3:first-child { margin-top: 0; }
+    .shots {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+    .shots.one { grid-template-columns: 1fr; }
+    .shots figure { margin: 0; }
+    .shot {
+        display: block;
+        width: 100%;
+        padding: 0;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface);
+        overflow: hidden;
+        cursor: zoom-in;
+        transition: border-color 120ms;
+    }
+    .shot:hover { border-color: var(--accent); }
+    .shot:focus-visible { border-radius: 10px; }
+    .shot img {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+    .shots figcaption {
+        margin-top: 8px;
+        font-size: 13px;
+        color: var(--muted);
+        text-align: center;
+    }
+    .shots figcaption strong { font-weight: 600; }
+    .shots.panels { max-width: 760px; margin: 0 auto; }
+
+    /* ------------------------------------------------------ features */
+    .features {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .features li {
+        padding: 16px 18px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 15px;
+        line-height: 1.5;
+    }
+    .features li strong {
+        display: block;
+        margin-bottom: 2px;
+        font-size: 16px;
+    }
+
+    /* --------------------------------------------------------- setup */
+    .steps {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        counter-reset: step;
+    }
+    .steps > li {
+        position: relative;
+        margin-bottom: 16px;
+        padding-left: 44px;
+        counter-increment: step;
+    }
+    .steps > li::before {
+        content: counter(step);
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--c);
+        color: #16131A;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 28px;
+        text-align: center;
+    }
+    /* the logo's colors: the play button's coral and pink, the timeline's blue and green */
+    .steps > li:nth-child(1) { --c: #FF8B5C; }
+    .steps > li:nth-child(2) { --c: #FF6D78; }
+    .steps > li:nth-child(3) { --c: #6E9CF5; }
+    .steps > li:nth-child(4) { --c: #4FCDA2; }
+    .steps > li:nth-child(5) { --c: #FF8B5C; }
+
+    .callout {
+        margin: 28px 0 0;
+        padding: 16px 20px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        border-radius: 8px;
+        scroll-margin-top: 24px;
+    }
+    .callout h3 { margin: 0 0 6px; font-size: 16px; }
+    .callout p, .callout li { font-size: 15px; }
+    .callout p { margin: 0 0 8px; }
+    .callout p:last-child { margin-bottom: 0; }
+    .callout ol { margin: 0 0 8px; padding-left: 20px; }
+    .callout li { margin-bottom: 4px; }
+
+    details {
+        margin-top: 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+    }
+    summary {
+        padding: 14px 20px;
+        font-weight: 600;
+        color: var(--text-strong);
+        cursor: pointer;
+        list-style: none;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::before {
+        content: "";
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        margin: 0 12px 2px 0;
+        border-right: 2px solid var(--muted);
+        border-bottom: 2px solid var(--muted);
+        transform: rotate(-45deg);
+        transition: transform 120ms;
+    }
+    details[open] summary::before { transform: rotate(45deg); }
+    .details-body { padding: 0 20px 18px; }
+    .details-body h3 { margin: 12px 0 6px; font-size: 16px; }
+    .details-body h3 ~ h3 { margin-top: 24px; }
+
+    .path {
+        display: flex;
+        align-items: stretch;
+        margin: 8px 0 12px;
+        background: #15161E;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+    }
+    .path code {
+        flex: 1;
+        min-width: 0;
+        padding: 9px 12px;
+        overflow-x: auto;
+        white-space: nowrap;
+        font: 13px/1.5 ui-monospace, "SF Mono", Menlo, monospace;
+        color: var(--text);
+    }
+    .copy {
+        flex: none;
+        padding: 0 14px;
+        border: 0;
+        border-left: 1px solid var(--border);
+        border-radius: 0 6px 6px 0;
+        background: transparent;
+        color: var(--link);
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .copy:hover { background: var(--surface); }
+
+    /* ------------------------------------------------------ lightbox */
+    .lightbox {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(10, 10, 14, 0.92);
+        z-index: 100;
+        cursor: zoom-out;
+        padding: 24px;
+    }
+    .lightbox[hidden] { display: none; }
+    .lightbox img {
+        max-width: 96vw;
+        max-height: 92vh;
+        width: auto;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+    }
+    .lightbox-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 40px;
+        height: 40px;
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        background: var(--surface);
+        color: var(--text-strong);
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    /* -------------------------------------------------------- footer */
+    footer {
+        margin-top: 88px;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+    }
+    footer p { margin: 0 0 6px; }
+    footer a { text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    .sep { margin: 0 6px; opacity: 0.5; }
+
+    @media (max-width: 860px) {
+        .row, .row.flip { grid-template-columns: 1fr; gap: 18px; }
+        .row.flip .clip { order: 0; }
+        .showcase { gap: 48px; }
+    }
+    @media (max-width: 620px) {
+        .wrap { padding-top: 48px; }
+        .shots, .features { grid-template-columns: 1fr; }
+        section { margin-top: 56px; }
+        .btn { min-width: 0; width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        * { transition: none !important; }
+    }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <header class="hero">
+        <img class="mark" src="images/logo.png" alt="" width="112" height="112">
+        <h1>SPEEDRUN</h1>
+        <p class="tagline">The Mac video editor where Claude builds your edit and you finish it by&nbsp;hand</p>
+        <div class="buttons">
+            <a class="btn" id="dl-dmg" href="https://github.com/tlatvys-ac/speedrun-app/releases/latest/download/Speedrun-0.2.0.dmg">
+                Download Speedrun
+                <small>macOS 26 · Apple silicon · free</small>
+            </a>
+        </div>
+        <p class="hero-notes">
+            Works with your Claude Code sign-in. Not notarized yet, so the first
+            launch takes one extra click. <a href="#unsigned">What to expect</a>
+        </p>
+        <div class="hero-media">
+            <video id="hero-video" class="autoplay" width="1800" height="1048" autoplay muted loop playsinline preload="auto" poster="images/hero-poster.jpg" aria-label="Speedrun with an empty timeline. A request is sent to Claude in the side panel: sync the two cameras, cut the Town Hall interview from three sections, grade with the LUTs, add the lower third and set dialogue to −16 LUFS. Claude's steps scroll by as it syncs, transcribes and reviews, and the timeline fills with twenty alternating wide and medium shots, the graded picture appears in the viewer and the lower third lands on V2. Then the cut plays.">
+                <source src="images/hero.mp4" type="video/mp4">
+            </video>
+            <button class="video-toggle" type="button" aria-label="Pause video">
+                <svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="2.5" width="3" height="11" rx="1"/><rect x="9.5" y="2.5" width="3" height="11" rx="1"/></svg>
+                <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.8v10.4a.8.8 0 0 0 1.2.7l8.4-5.2a.8.8 0 0 0 0-1.4L5.7 2.1a.8.8 0 0 0-1.2.7z"/></svg>
+            </button>
+        </div>
+        <p class="media-caption"><strong>One request, start to finish</strong> — Claude syncs two 4K cameras, transcribes, and cuts a 1:56 interview in 20 shots with the LUTs, the lower third and levels in place. 2 min 38 s of work, shown 12× faster.</p>
+    </header>
+
+    <main>
+    <section>
+        <h2 class="divider">About</h2>
+        <p class="lead">Speedrun is a lightweight video editor for the Mac.
+        Bring footage into a project, ask Claude to sync the cameras, pick the
+        cleanest mic, transcribe, and cut from your notes. The result is a
+        real multi-track timeline you can watch, trim and adjust.</p>
+        <p>Claude edits through Speedrun's own tools, so everything it does
+        lands on the timeline as it works, and a whole request is one undo
+        step. Export a movie when you're happy, or hand an EDL or Premiere XML
+        to Premiere for finishing.</p>
+    </section>
+
+    <section>
+        <h2 class="divider">See it work</h2>
+        <div class="showcase breakout">
+            <article class="row">
+                <figure class="clip">
+                    <video class="autoplay" width="940" height="690" muted loop playsinline preload="none" poster="images/trim-poster.jpg" aria-label="Trim mode on a cut between the wide and the medium. The viewer shows the outgoing frame (A) beside the incoming frame (B) above the timeline's yellow rollers. The cut rolls six frames earlier, then the B side and the A side are each trimmed while playing, with the frame counters running.">
+                        <source src="images/trim.mp4" type="video/mp4">
+                    </video>
+                    <button class="video-toggle" type="button" aria-label="Pause video">
+                        <svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="2.5" width="3" height="11" rx="1"/><rect x="9.5" y="2.5" width="3" height="11" rx="1"/></svg>
+                        <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.8v10.4a.8.8 0 0 0 1.2.7l8.4-5.2a.8.8 0 0 0 0-1.4L5.7 2.1a.8.8 0 0 0-1.2.7z"/></svg>
+                    </button>
+                </figure>
+                <div class="row-text">
+                    <span class="eyebrow">Trim mode</span>
+                    <h3>Trim the way Media Composer does</h3>
+                    <p>Click a cut and press <kbd>U</kbd>. The viewer splits into
+                    the outgoing and incoming frames, and <kbd>J</kbd> / <kbd>L</kbd>
+                    play through the side you're trimming, with sound.
+                    <kbd>K</kbd> sets the edit where you stopped.</p>
+                    <p>Roll both sides, or click A or B to trim just one. Everything
+                    after it moves on every track, so picture and sound stay in sync.</p>
+                    <p class="fine">Shown: a 6-frame roll, then the B side and the A side trimmed on the fly.</p>
+                </div>
+            </article>
+
+            <article class="row flip">
+                <figure class="clip">
+                    <video class="autoplay" width="1600" height="936" muted loop playsinline preload="none" poster="images/markers-poster.jpg" aria-label="A red marker named Tighten this shot is added on the timeline, and the marker editor opens with its note, color and the Feedback tag. In the Claude panel the request is: I left you a feedback marker, can you take care of it? Claude trims the shot by about two seconds without cutting the sentence, switches angle so there is no jump cut, and the marker is tagged Done in the Markers tab.">
+                        <source src="images/markers.mp4" type="video/mp4">
+                    </video>
+                    <button class="video-toggle" type="button" aria-label="Pause video">
+                        <svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="2.5" width="3" height="11" rx="1"/><rect x="9.5" y="2.5" width="3" height="11" rx="1"/></svg>
+                        <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.8v10.4a.8.8 0 0 0 1.2.7l8.4-5.2a.8.8 0 0 0 0-1.4L5.7 2.1a.8.8 0 0 0-1.2.7z"/></svg>
+                    </button>
+                </figure>
+                <div class="row-text">
+                    <span class="eyebrow">Markers</span>
+                    <h3>Leave notes, and Claude works through them</h3>
+                    <p>Press <kbd>M</kbd> to drop a marker, and <kbd>M</kbd> again
+                    to give it a name, a note, a color and tags. Put them on the
+                    sequence for revisions, or on the footage itself to flag a
+                    great answer.</p>
+                    <p>Claude reads every marker. It builds first cuts from your
+                    Selects, and works through Feedback, tagging each note Done.</p>
+                    <p class="fine">Claude's minute of work is shown 6× faster.</p>
+                </div>
+            </article>
+
+            <article class="row">
+                <figure class="clip">
+                    <video class="autoplay" width="1280" height="674" muted loop playsinline preload="none" poster="images/transform-poster.jpg" aria-label="The Scott Stroud lower third gets a bounding box in the viewer. It moves left and up, scales up from 120 to 160 percent, rotates a few degrees and back, and the Position and Scale values in the Properties panel update when it is let go.">
+                        <source src="images/transform.mp4" type="video/mp4">
+                    </video>
+                    <button class="video-toggle" type="button" aria-label="Pause video">
+                        <svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="2.5" width="3" height="11" rx="1"/><rect x="9.5" y="2.5" width="3" height="11" rx="1"/></svg>
+                        <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.8v10.4a.8.8 0 0 0 1.2.7l8.4-5.2a.8.8 0 0 0 0-1.4L5.7 2.1a.8.8 0 0 0-1.2.7z"/></svg>
+                    </button>
+                </figure>
+                <div class="row-text">
+                    <span class="eyebrow">Motion</span>
+                    <h3>Move, scale and rotate right in the viewer</h3>
+                    <p>Double-click a clip in the viewer for its bounding box. Drag
+                    to move, pull a corner to scale, and swing just outside a corner
+                    to rotate. The picture follows live.</p>
+                    <p>The Properties panel works like Premiere's Effect Controls,
+                    with keyframes for position, scale, rotation, opacity and volume.
+                    Media comes in at its own size, 100%.</p>
+                </div>
+            </article>
+
+            <article class="row flip">
+                <figure class="clip">
+                    <video class="autoplay" width="1080" height="896" muted loop playsinline preload="none" poster="images/source-poster.jpg" aria-label="The medium camera file opens in the source monitor beside the program monitor. An in point is marked, it plays for three seconds, an out point is marked, and the range is inserted into the timeline at the playhead, pushing the later shots to the right.">
+                        <source src="images/source.mp4" type="video/mp4">
+                    </video>
+                    <button class="video-toggle" type="button" aria-label="Pause video">
+                        <svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="2.5" width="3" height="11" rx="1"/><rect x="9.5" y="2.5" width="3" height="11" rx="1"/></svg>
+                        <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.8v10.4a.8.8 0 0 0 1.2.7l8.4-5.2a.8.8 0 0 0 0-1.4L5.7 2.1a.8.8 0 0 0-1.2.7z"/></svg>
+                    </button>
+                </figure>
+                <div class="row-text">
+                    <span class="eyebrow">Source monitor</span>
+                    <h3>Find a moment, mark it, cut it in</h3>
+                    <p>Double-click a clip in the Project panel to open it in the
+                    source monitor, with the camera's timecode and its LUT. Mark
+                    in and out with <kbd>I</kbd> and <kbd>O</kbd>.</p>
+                    <p>Press <kbd>,</kbd> to insert at the playhead, moving
+                    everything after it, or <kbd>.</kbd> to overwrite. Press
+                    <kbd>F</kbd> to match frame back to the source.</p>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section>
+        <h2 class="divider">What it looks like</h2>
+        <div class="gallery breakout">
+            <div class="shots one">
+                <figure>
+                    <button class="shot" type="button" aria-haspopup="dialog">
+                        <picture>
+                            <source type="image/avif" srcset="images/editor.avif">
+                            <img src="images/editor.jpg" width="2400" height="1302" loading="lazy" decoding="async" alt="The Speedrun window: the Project panel with Footage and Graphics bins, the source monitor showing the medium camera, the program monitor showing the graded wide shot with the Scott Stroud lower third, Claude's summary of the cut in the side panel, and a timeline with the lower third on V2 above twenty alternating shots on V1 and their dialogue on A1, next to the audio meter">
+                        </picture>
+                    </button>
+                    <figcaption><strong>The editor</strong> — Project, source and program monitors, Claude, and the timeline</figcaption>
+                </figure>
+            </div>
+            <h3>Side panel</h3>
+            <div class="shots panels">
+                <figure>
+                    <button class="shot" type="button" aria-haspopup="dialog">
+                        <picture>
+                            <source type="image/avif" srcset="images/transcript.avif">
+                            <img src="images/transcript.png" width="938" height="1044" loading="lazy" decoding="async" alt="The Transcript tab: a searchable list of everything said, with a time for each sentence and a film icon on the lines used in the cut, from 'Tell me your name, your business, or agency' to 'My name is Scott Stroud. I'm with MHCRM.'">
+                        </picture>
+                    </button>
+                    <figcaption><strong>Transcript</strong> — click a line to jump there, right-click to cut it in</figcaption>
+                </figure>
+                <figure>
+                    <button class="shot" type="button" aria-haspopup="dialog">
+                        <picture>
+                            <source type="image/avif" srcset="images/properties.avif">
+                            <img src="images/properties.png" width="938" height="1044" loading="lazy" decoding="async" alt="The Properties tab for a wide shot: its start, duration, source timecode and sync group, then Motion (position, scale, rotation with keyframe stopwatches, Fit to Frame and 100%), Opacity with fades, and Volume at +23.5 dB on the right channel">
+                        </picture>
+                    </button>
+                    <figcaption><strong>Properties</strong> — motion, opacity, volume and color, all keyframeable</figcaption>
+                </figure>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2 class="divider">Features</h2>
+        <ul class="features">
+            <li><strong>Claude builds the first cut</strong>Waveform sync of multiple cameras, the cleanest mic channel, on-device transcription, and a cut from your notes with edits snapped to pauses</li>
+            <li><strong>A real timeline</strong>Drag, trim, ripple, roll, split and close gaps. Crossfades, fades, gain lines and level keyframes, with snapping on <kbd>S</kbd> and audio scrubbing on <kbd>⇧S</kbd></li>
+            <li><strong>Edit by what was said</strong>A transcript with word timings. Search it, jump to a line, or cut it straight into the timeline</li>
+            <li><strong>Color</strong>A .cube LUT plus exposure, temperature, tint, contrast, saturation and black level, set per clip or as a source's default</li>
+            <li><strong>Bins and sequences</strong>Nested bins for media, any number of sequences, and duplicates for trying an alternate cut</li>
+            <li><strong>Proxies when you need them</strong>Speedrun times how fast each file decodes and makes 1080p proxies for heavy footage. Export always uses the originals</li>
+            <li><strong>Hand off to Premiere</strong>Premiere XML with every track, levels, fades, dissolves, motion, keyframes and markers. Also CMX 3600 EDLs and SRT captions</li>
+            <li><strong>Export a movie</strong>H.264, HEVC or ProRes, loudness-normalized to −16 LUFS, starting at timecode 01:00:00:00</li>
+            <li><strong>Media macOS can't play</strong>QuickTime Animation graphics are converted to ProRes 4444 (alpha kept) when you import them</li>
+            <li><strong>Your footage stays put</strong>Media is used in place, never copied or uploaded. Claude reads transcripts and the timeline, and looks at still frames to check its work</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2 class="divider">Setup</h2>
+        <ol class="steps">
+            <li><strong>Get Claude Code.</strong> Speedrun runs your own
+                <a href="https://docs.anthropic.com/en/docs/claude-code/setup">Claude Code</a>
+                and its sign-in, so any plan or company setup that works in
+                Terminal works here. Run <code>claude</code> in Terminal once to
+                sign in.</li>
+            <li><strong>Download Speedrun.</strong> It's one
+                <code>Speedrun-<span class="v">0.2.0</span>.dmg</code> file.</li>
+            <li><strong>Install it.</strong> Open the .dmg and drag Speedrun
+                into Applications.</li>
+            <li><strong>Open it once from Privacy &amp; Security.</strong> The
+                first launch needs the extra step below. After that it opens
+                like any app.</li>
+            <li><strong>Make a project.</strong> Choose <em>New Project</em>,
+                drag in your footage, then open the <em>Claude</em> tab and say
+                what you want, such as "Sync the cameras and cut the intro from
+                my notes."</li>
+        </ol>
+
+        <div class="callout" id="unsigned">
+            <h3>If macOS won't open Speedrun</h3>
+            <p>Speedrun isn't notarized by Apple yet, so the first time you open
+            it macOS says it can't check it for malicious software. To open it:</p>
+            <ol>
+                <li>Open Speedrun, and click <strong>Done</strong> in the message.</li>
+                <li>Go to <em>System Settings&nbsp;→ Privacy &amp; Security</em>,
+                    scroll down to the Speedrun message, and click
+                    <strong>Open Anyway</strong>.</li>
+                <li>Confirm with your password. macOS remembers this.</li>
+            </ol>
+            <p>Speedrun also asks once for access to the folders with your
+            footage, and for speech recognition to make transcripts.</p>
+        </div>
+
+        <details>
+            <summary>Advanced and uninstalling</summary>
+            <div class="details-body">
+                <h3>Optional: ffmpeg</h3>
+                <p class="fine">With <a href="https://formulae.brew.sh/formula/ffmpeg">ffmpeg</a>
+                installed, Speedrun can also read MP4 and Sony XAVC timecode,
+                make cleaned-up dialogue files, and convert QuickTime Animation
+                graphics. Using Homebrew:</p>
+                <div class="path">
+                    <code id="ffmpeg">brew install ffmpeg</code>
+                    <button class="copy" type="button" data-copy="ffmpeg">Copy</button>
+                </div>
+                <h3>Where things go</h3>
+                <p class="fine">A project is a <code>Name.speedrun</code> folder
+                holding a readable <code>project.json</code> and the Claude
+                conversation. Files Speedrun makes, like converted graphics,
+                proxies and cleaned dialogue, go in a <code>Name Media</code>
+                folder next to it. Claude connects to Speedrun through a private
+                bridge that only accepts connections from this Mac.</p>
+                <h3>Uninstalling</h3>
+                <p class="fine">Drag Speedrun from Applications to the Trash.
+                To remove its waveform cache and settings too:</p>
+                <div class="path">
+                    <code id="cache">~/Library/Caches/Speedrun</code>
+                    <button class="copy" type="button" data-copy="cache">Copy</button>
+                </div>
+                <div class="path">
+                    <code id="prefs">~/Library/Preferences/com.tlatvys.speedrun.plist</code>
+                    <button class="copy" type="button" data-copy="prefs">Copy</button>
+                </div>
+                <p class="fine">Your projects and footage stay where you saved them.</p>
+            </div>
+        </details>
+    </section>
+
+    <section>
+        <h2 class="divider">Requirements</h2>
+        <p class="fine">macOS 26 on a Mac with Apple silicon, and Claude Code
+        installed and signed in. Transcription runs on your Mac. Claude's work
+        counts toward your Claude plan or API usage like any other Claude Code
+        session.</p>
+    </section>
+    </main>
+
+    <footer>
+        <p>Speedrun <span id="version">v0.2.0</span><span class="sep">·</span><wbr><a href="https://github.com/tlatvys-ac/speedrun-app/releases">Release notes</a><span class="sep">·</span><wbr>Made&nbsp;by&nbsp;Thomas&nbsp;Latvys</p>
+        <p>More tools:
+            <a href="https://tlatvys-ac.github.io/fluidlab-app/">FluidLab</a><span class="sep">·</span><wbr><a href="https://tlatvys-ac.github.io/refractlab-app/">RefractLab</a><span class="sep">·</span><wbr><a href="https://tlatvys-ac.github.io/anchor-buddy-app/">Anchor&nbsp;Buddy</a><span class="sep">·</span><wbr><a href="https://tlatvys-ac.github.io/transporter-app/">Transporter</a><span class="sep">·</span><wbr><a href="https://tlatvys-ac.github.io/aedoom-app/">AEDoom</a><span class="sep">·</span><wbr><a href="https://tlatvys-ac.github.io/motionref-app/">MotionRef</a><span class="sep">·</span><wbr><a href="https://tlatvys-ac.github.io/meld-app/">Meld</a><span class="sep">·</span><wbr><a href="https://tlatvys-ac.github.io/gradientlab-app/">GradientLab</a><span class="sep">·</span><wbr><a href="https://tlatvys-ac.github.io/cursor-time-app/">Cursor&nbsp;Time</a>
+        </p>
+    </footer>
+</div>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Screenshot preview" hidden>
+    <img id="lightbox-img" src="" alt="">
+    <button class="lightbox-close" id="lightbox-close" type="button" aria-label="Close preview">×</button>
+</div>
+
+<script>
+// Click (or Enter/Space on) a screenshot to preview it at full size;
+// click anywhere, press Escape, or use the close button to close. Focus
+// moves into the preview and back to the screenshot that opened it.
+(() => {
+    const box = document.getElementById("lightbox");
+    const big = document.getElementById("lightbox-img");
+    const closeBtn = document.getElementById("lightbox-close");
+    let opener = null;
+    const open = (btn) => {
+        const img = btn.querySelector("img");
+        big.src = img.currentSrc || img.src;
+        big.alt = img.alt;
+        opener = btn;
+        box.hidden = false;
+        document.body.style.overflow = "hidden";
+        closeBtn.focus();
+    };
+    const close = () => {
+        if (box.hidden) return;
+        box.hidden = true;
+        document.body.style.overflow = "";
+        if (opener) opener.focus();
+    };
+    document.querySelectorAll(".shot").forEach((btn) => btn.addEventListener("click", () => open(btn)));
+    box.addEventListener("click", close);
+    document.addEventListener("keydown", (e) => {
+        if (box.hidden) return;
+        if (e.key === "Escape") close();
+        if (e.key === "Tab") { e.preventDefault(); closeBtn.focus(); }
+    });
+})();
+
+// Copy buttons.
+document.querySelectorAll(".copy").forEach((btn) => {
+    btn.addEventListener("click", () => {
+        const text = document.getElementById(btn.dataset.copy).textContent;
+        const done = () => {
+            btn.textContent = "Copied";
+            setTimeout(() => { btn.textContent = "Copy"; }, 1500);
+        };
+        if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, () => {});
+    });
+});
+
+// Videos: each has a pause/play button. They play only while on screen,
+// and not at all (until you press play) with reduced motion.
+(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.querySelectorAll("video.autoplay").forEach((video) => {
+        const btn = video.parentElement.querySelector(".video-toggle");
+        let userPaused = reduce;
+        const sync = () => {
+            btn.classList.toggle("paused", video.paused);
+            btn.setAttribute("aria-label", video.paused ? "Play video" : "Pause video");
+        };
+        if (reduce) { video.removeAttribute("autoplay"); video.pause(); }
+        btn.addEventListener("click", () => {
+            if (video.paused) { userPaused = false; video.play(); }
+            else { userPaused = true; video.pause(); }
+        });
+        video.addEventListener("play", sync);
+        video.addEventListener("pause", sync);
+        sync();
+        if ("IntersectionObserver" in window) {
+            new IntersectionObserver((entries) => {
+                entries.forEach((e) => {
+                    if (e.isIntersecting && !userPaused) video.play().catch(() => {});
+                    else if (!e.isIntersecting && !video.paused) video.pause();
+                });
+            }, { threshold: 0.35 }).observe(video);
+        } else if (!reduce) {
+            video.play().catch(() => {});
+        }
+    });
+})();
+
+// Keep the version and download link pointing at the latest release
+// automatically; the hardcoded values above are the fallback if this
+// fetch fails.
+fetch("https://api.github.com/repos/tlatvys-ac/speedrun-app/releases/latest")
+    .then((r) => r.json())
+    .then((rel) => {
+        const v = (rel.tag_name || "").replace(/^v/, "");
+        if (v) {
+            document.getElementById("version").textContent = "v" + v;
+            document.querySelectorAll(".v").forEach((el) => { el.textContent = v; });
+        }
+        const dmg = (rel.assets || []).find((x) => /\.dmg$/.test(x.name));
+        if (dmg) document.getElementById("dl-dmg").href = dmg.browser_download_url;
+    })
+    .catch(() => {});
+</script>
+</body>
+</html>
