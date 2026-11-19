@@ -3,879 +3,1265 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Speedrun — the Mac video editor where Claude builds your first cut</title>
+<title>Speedrun — Ask for the cut. Finish it by hand.</title>
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="64x64" href="images/favicon.png">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-<meta name="description" content="Speedrun is a free macOS video editor. Ask Claude to sync your cameras, transcribe and cut from your notes, then finish on a real multi-track timeline with Avid-style trimming, markers, keyframes and color. Hands off to Premiere as XML or EDL.">
-<meta name="theme-color" content="#1B1C26">
+<meta name="description" content="Speedrun is a free video editor for the Mac with Claude built in. Ask for the edit, and Claude syncs the cameras, reads the transcript and cuts a real multi-track timeline. Then trim, grade and hand it to Premiere.">
+<meta name="theme-color" content="#0B0C10">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tlatvys-ac.github.io/speedrun-app/">
-<meta property="og:title" content="Speedrun — the Mac video editor where Claude builds your first cut">
-<meta property="og:description" content="Ask Claude to sync, transcribe and cut. Finish by hand on a real timeline, then export a movie or hand it to Premiere.">
+<meta property="og:title" content="Speedrun — Ask for the cut. Finish it by hand.">
+<meta property="og:description" content="A video editor for the Mac with Claude built in. Claude syncs, transcribes and cuts a real timeline; you trim, grade and hand it to Premiere.">
 <meta property="og:image" content="https://tlatvys-ac.github.io/speedrun-app/images/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="The Speedrun logo above the editor: a two-camera interview cut on the timeline, the graded picture with a lower third in the viewer, and Claude's summary of the edit in the side panel">
+<meta property="og:image:alt" content="Speedrun: Ask for the cut. Finish it by hand. Above the editor with a two-camera interview on the timeline.">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin>
+<script>document.documentElement.classList.add("js");</script>
 <style>
-    :root {
-        --bg: #1B1C26;
-        --surface: #262835;
-        --border: #3B3E50;
-        --text: #DDDEE3;
-        --text-strong: #FFF;
-        --muted: #9EA3B4;
-        /* the logo: the play button's coral-to-pink gradient */
-        --accent: #FF7D5E;
-        --accent-hover: #FF9A80;
-        --accent-2: #FF6D78;
-        --on-accent: #2A0F0A;
-        --link: #FF9E86;
-    }
-    * { box-sizing: border-box; }
-    html { overflow-x: clip; }
-    body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--text);
-        font-family: -apple-system, "SF Pro Text", "Helvetica Neue", "Segoe UI", sans-serif;
-        font-size: 16px;
-        line-height: 1.6;
-        -webkit-font-smoothing: antialiased;
-    }
-    .wrap {
-        max-width: 660px;
-        margin: 0 auto;
-        padding: 64px 24px 48px;
-    }
-    a { color: var(--link); text-underline-offset: 2px; }
-    a:hover { color: var(--accent-hover); }
-    :focus-visible {
-        outline: 2px solid var(--text-strong);
-        outline-offset: 3px;
-        border-radius: 4px;
-    }
-    h1, h2, h3, .tagline, figcaption, .media-caption { text-wrap: balance; }
+@font-face { font-family: "Instrument Sans"; src: url(fonts/instrument-sans.woff2) format("woff2"); font-weight: 400 700; font-stretch: 75% 100%; font-display: swap; }
+@font-face { font-family: "Instrument Serif"; src: url(fonts/instrument-serif-italic.woff2) format("woff2"); font-style: italic; font-display: swap; }
+@font-face { font-family: "Instrument Serif"; src: url(fonts/instrument-serif.woff2) format("woff2"); font-style: normal; font-display: swap; }
+@font-face { font-family: "JetBrains Mono"; src: url(fonts/jetbrains-mono.woff2) format("woff2"); font-weight: 400 600; font-display: swap; }
 
-    /* ---------------------------------------------------------- hero */
-    .hero {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-    .mark { width: 112px; height: 112px; }
-    h1 {
-        margin: 14px -0.3em 0 0;   /* cancel the trailing letter-spacing so it centers */
-        font-size: 28px;
-        font-weight: 700;
-        letter-spacing: 0.3em;
-        line-height: 1.2;
-        color: var(--text-strong);
-    }
-    .tagline {
-        margin: 12px 0 0;
-        color: #B9BCC8;
-        font-size: 18px;
-        max-width: 480px;
-    }
-    .buttons {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 12px;
-        margin-top: 28px;
-    }
-    .btn {
-        display: inline-block;
-        min-width: 296px;
-        text-align: center;
-        background: linear-gradient(100deg, var(--accent), var(--accent-2));
-        border-radius: 8px;
-        color: var(--on-accent);
-        font-size: 16px;
-        font-weight: 700;
-        line-height: 1.4;
-        padding: 12px 32px;
-        text-decoration: none;
-        box-shadow: 0 6px 24px rgba(255, 115, 95, 0.24);
-        transition: filter 120ms, box-shadow 120ms, transform 120ms;
-        white-space: nowrap;
-    }
-    .btn:hover {
-        color: var(--on-accent);
-        filter: brightness(1.08);
-        box-shadow: 0 8px 32px rgba(255, 115, 95, 0.38);
-        transform: translateY(-1px);
-    }
-    .btn:active { transform: none; box-shadow: 0 4px 16px rgba(255, 115, 95, 0.24); }
-    .btn small {
-        display: block;
-        font-weight: 500;
-        font-size: 12px;
-        color: rgba(42, 15, 10, 0.78);
-    }
-    .hero-notes {
-        margin: 16px 0 0;
-        color: var(--muted);
-        font-size: 14px;
-        line-height: 1.7;
-    }
+:root {
+    --bg: #0B0C10;
+    --bg-2: #121319;
+    --bg-3: #181A21;
+    --line: rgba(255, 255, 255, 0.08);
+    --line-2: rgba(255, 255, 255, 0.14);
+    --text: #F3F1EC;
+    --muted: #A3A4AE;
+    --dim: #8A8C97;
+    --coral: #FF7D5E;
+    --pink: #FF6D78;
+    --grad: linear-gradient(100deg, #FF8A5E 0%, #FF6D78 60%, #FF5F8F 100%);
+    --clip-v: #3D619E;
+    --clip-v2: #34568E;
+    --clip-g: #6B529E;
+    --clip-a: #337054;
+    --wave: #8CD9A6;
+    --sans: "Instrument Sans", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --wrap: 1320px;
+    --pad: clamp(20px, 4vw, 48px);
+    --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: 80px; }
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 400 18px/1.55 var(--sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+}
+/* Film grain over everything, very faint. */
+body::after {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+img, video { display: block; max-width: 100%; }
+a { color: inherit; }
+::selection { background: rgba(255, 125, 94, 0.35); }
+:focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; border-radius: 4px; }
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 200; background: var(--text); color: var(--bg); padding: 10px 14px; border-radius: 8px; }
+.skip:focus { left: 8px; }
+.wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--pad); }
+em { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -0.01em; }
+code, kbd, .mono { font-family: var(--mono); }
+kbd {
+    display: inline-block; min-width: 1.6em; padding: 0.05em 0.45em; text-align: center;
+    font-size: 0.78em; line-height: 1.5; color: var(--text);
+    background: var(--bg-3); border: 1px solid var(--line-2); border-bottom-width: 2px; border-radius: 5px;
+}
 
-    /* Hero video: an NLE needs room, so it uses the gallery's width. */
-    .hero-media {
-        position: relative;
-        flex: none;
-        width: min(1080px, calc(100vw - 48px));
-        margin-top: 44px;
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        overflow: hidden;
-        background: #14151C;
-        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
-    }
-    .hero-media video, .clip video {
-        display: block;
-        width: 100%;
-        height: auto;
-    }
-    .media-caption {
-        width: min(1080px, calc(100vw - 48px));
-        margin: 12px 0 0;
-        color: var(--muted);
-        font-size: 13px;
-    }
-    .media-caption strong { font-weight: 600; }
-    .video-toggle {
-        position: absolute;
-        right: 14px;
-        bottom: 14px;
-        display: grid;
-        place-items: center;
-        width: 36px;
-        height: 36px;
-        padding: 0;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 50%;
-        background: rgba(20, 22, 30, 0.6);
-        -webkit-backdrop-filter: blur(8px);
-        backdrop-filter: blur(8px);
-        color: #FFF;
-        cursor: pointer;
-        opacity: 0.75;
-        transition: opacity 120ms;
-    }
-    .video-toggle:hover, .video-toggle:focus-visible { opacity: 1; }
-    .video-toggle:focus-visible { border-radius: 50%; }
-    .video-toggle svg { width: 14px; height: 14px; fill: currentColor; }
-    .video-toggle .icon-play, .video-toggle.paused .icon-pause { display: none; }
-    .video-toggle.paused .icon-play { display: block; }
+/* ---------- Nav ---------- */
+.nav {
+    position: fixed; inset: 0 0 auto 0; z-index: 50;
+    transition: background-color 0.4s, border-color 0.4s, backdrop-filter 0.4s;
+    border-bottom: 1px solid transparent;
+}
+.nav.scrolled {
+    background: rgba(11, 12, 16, 0.72);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    backdrop-filter: blur(18px) saturate(150%);
+    border-bottom-color: var(--line);
+}
+.nav-in { display: flex; align-items: center; gap: 28px; height: 68px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 600; font-size: 18px; letter-spacing: -0.01em; }
+.brand img { width: 28px; height: 28px; }
+.nav-links { display: flex; gap: 26px; margin: 0; padding: 0; list-style: none; font-size: 15px; }
+.nav-links a { text-decoration: none; color: var(--muted); transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-tc { margin-left: auto; font: 500 12px var(--mono); color: var(--dim); letter-spacing: 0.04em; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 8px; }
+.nav-tc i { width: 6px; height: 6px; border-radius: 50%; background: var(--coral); box-shadow: 0 0 10px var(--coral); }
+.progress { position: absolute; left: 0; bottom: -1px; height: 1px; width: 100%; background: var(--grad); transform-origin: 0 50%; transform: scaleX(var(--p, 0)); opacity: 0.9; }
 
-    /* ------------------------------------------------------ sections */
-    section { margin-top: 72px; }
-    h2.divider {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin: 0 0 24px;
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--muted);
-    }
-    h2.divider::before, h2.divider::after {
-        content: "";
-        flex: 1;
-        height: 1px;
-        background: var(--border);
-    }
-    h3 {
-        margin: 32px 0 8px;
-        font-size: 17px;
-        font-weight: 700;
-        line-height: 1.4;
-        color: var(--text-strong);
-    }
-    p { margin: 0 0 12px; }
-    .lead { font-size: 17px; }
-    .fine { color: var(--muted); font-size: 14px; }
-    strong { color: var(--text-strong); }
-    code { font: 14px ui-monospace, "SF Mono", Menlo, monospace; color: var(--text-strong); }
-    kbd {
-        display: inline-block;
-        min-width: 1.6em;
-        padding: 0 5px;
-        border: 1px solid var(--border);
-        border-bottom-width: 2px;
-        border-radius: 4px;
-        background: #20212C;
-        font: 600 13px/1.5 -apple-system, "SF Pro Text", sans-serif;
-        color: var(--text-strong);
-        text-align: center;
-    }
+.btn {
+    --h: 46px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    height: var(--h); padding: 0 22px; border-radius: 11px;
+    font: 600 16px var(--sans); letter-spacing: -0.005em; text-decoration: none; white-space: nowrap;
+    color: #0B0C10; background: var(--text);
+    transition: transform 0.25s var(--ease), background-color 0.25s, box-shadow 0.25s;
+    box-shadow: 0 0 0 0 rgba(255, 125, 94, 0);
+}
+.btn:hover { background: #fff; transform: translateY(-1px); box-shadow: 0 10px 30px -10px rgba(255, 125, 94, 0.55); }
+.btn svg { width: 17px; height: 17px; flex: none; }
+.btn.small { --h: 38px; padding: 0 16px; font-size: 14.5px; border-radius: 9px; }
+.btn.ghost { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); }
+.btn.ghost:hover { background: rgba(255, 255, 255, 0.06); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25); }
 
-    /* ---------------------------------------------- feature showcase */
-    /* Video beside text, alternating sides; breaks out of the text column. */
-    .breakout {
-        width: min(1080px, calc(100vw - 48px));
-        margin-left: 50%;
-        transform: translateX(-50%);
-    }
-    .showcase { display: grid; gap: 56px; }
-    .row {
-        display: grid;
-        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-        gap: 40px;
-        align-items: center;
-    }
-    .row.flip { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); }
-    .row.flip .clip { order: 2; }
-    .clip {
-        position: relative;
-        margin: 0;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        overflow: hidden;
-        background: #14151C;
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
-    }
-    .row-text h3 { margin-top: 0; font-size: 20px; }
-    .row-text p { font-size: 16px; }
-    .row-text .fine { margin-top: 12px; }
-    .eyebrow {
-        display: block;
-        margin-bottom: 6px;
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: var(--accent);
-    }
+/* ---------- Type ---------- */
+.eyebrow {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 28px;
+    font: 500 12px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+}
+.eyebrow .flag { width: 9px; height: 12px; flex: none; background: var(--c, var(--coral)); clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%); }
+.eyebrow .tc { color: var(--dim); }
+.eyebrow > span:last-child { white-space: nowrap; }
+.eyebrow .sep { width: 18px; height: 1px; background: var(--line-2); }
+h1, h2, h3 { margin: 0; font-weight: 500; }
+.display {
+    font-size: clamp(46px, 8.7vw, 140px); line-height: 0.94; letter-spacing: -0.045em; font-stretch: 96%;
+}
+.display em { letter-spacing: -0.025em; font-size: 1.04em; }
+.h2 { font-size: clamp(38px, 5.6vw, 86px); line-height: 0.96; letter-spacing: -0.04em; font-stretch: 96%; }
+.h2 em, .h3 em { color: #D8CFC4; }
+.h3 { font-size: clamp(28px, 3.2vw, 44px); line-height: 1.02; letter-spacing: -0.03em; }
+.lede { font-size: clamp(18px, 1.5vw, 21px); line-height: 1.5; color: var(--muted); max-width: 31em; margin: 0; }
+.lede strong { color: var(--text); font-weight: 500; }
+.grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: 0.06em; }
 
-    /* ------------------------------------------------------- gallery */
-    .gallery h3 {
-        margin: 40px 0 14px;
-        font-size: 13px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--muted);
-        text-align: center;
-    }
-    .gallery h3:first-child { margin-top: 0; }
-    .shots {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-    }
-    .shots.one { grid-template-columns: 1fr; }
-    .shots figure { margin: 0; }
-    .shot {
-        display: block;
-        width: 100%;
-        padding: 0;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        background: var(--surface);
-        overflow: hidden;
-        cursor: zoom-in;
-        transition: border-color 120ms;
-    }
-    .shot:hover { border-color: var(--accent); }
-    .shot:focus-visible { border-radius: 10px; }
-    .shot img {
-        display: block;
-        width: 100%;
-        height: auto;
-    }
-    .shots figcaption {
-        margin-top: 8px;
-        font-size: 13px;
-        color: var(--muted);
-        text-align: center;
-    }
-    .shots figcaption strong { font-weight: 600; }
-    .shots.panels { max-width: 760px; margin: 0 auto; }
+/* Word-by-word reveal (only when JS has split the heading). */
+.js [data-split] .w { display: inline-block; white-space: nowrap; }
+.js [data-split] .w > span {
+    display: inline-block;
+    opacity: 0; transform: translateY(0.32em); filter: blur(8px);
+    transition: opacity 0.9s var(--ease), transform 1.1s var(--ease), filter 0.9s var(--ease);
+    transition-delay: calc(var(--i) * 55ms + var(--d, 0ms));
+}
+.js [data-split].in .w > span { opacity: 1; transform: none; filter: none; }
+.js .reveal { opacity: 0; transform: translateY(24px); transition: opacity 1s var(--ease), transform 1.2s var(--ease); transition-delay: var(--d, 0ms); }
+.js .reveal.in { opacity: 1; transform: none; }
 
-    /* ------------------------------------------------------ features */
-    .features {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        margin: 0;
-        padding: 0;
-        list-style: none;
-    }
-    .features li {
-        padding: 16px 18px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        font-size: 15px;
-        line-height: 1.5;
-    }
-    .features li strong {
-        display: block;
-        margin-bottom: 2px;
-        font-size: 16px;
-    }
+/* ---------- Hero ---------- */
+.hero { padding: clamp(120px, 15vh, 170px) 0 0; position: relative; overflow-x: clip; }
+.hero::before {
+    content: ""; position: absolute; left: 50%; top: 52%; width: min(1400px, 100%); height: 900px; transform: translate(-50%, 0);
+    background: radial-gradient(closest-side, rgba(255, 109, 120, 0.16), rgba(255, 125, 94, 0.06) 45%, transparent 75%);
+    pointer-events: none; filter: blur(20px);
+}
+.hero-grid { margin-top: clamp(28px, 3.4vw, 48px); }
+.hero-side { display: flex; justify-content: space-between; align-items: flex-end; gap: 28px 64px; flex-wrap: wrap; }
+.hero-side .lede { max-width: 33em; }
+.display .l { display: block; }
+.cta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+.meta { font: 500 12px var(--mono); color: var(--dim); letter-spacing: 0.04em; }
+.meta a { color: var(--muted); text-underline-offset: 3px; }
+.hero-media { margin-top: clamp(48px, 6vw, 80px); position: relative; }
+.frame {
+    position: relative; border-radius: 18px; overflow: hidden;
+    background: #000; border: 1px solid var(--line-2);
+    box-shadow: 0 60px 120px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+.hero-frame { transform-origin: 50% 0; transform: scale(var(--s, 1)); will-change: transform; }
+.frame video, .frame > img, .frame picture img { width: 100%; height: auto; }
+.chip {
+    position: absolute; z-index: 2; display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 11px; border-radius: 8px; font: 500 11px var(--mono); letter-spacing: 0.06em; text-transform: uppercase;
+    color: #E9E6E0; background: rgba(11, 12, 16, 0.66); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.chip i { width: 6px; height: 6px; border-radius: 50%; background: var(--coral); animation: blink 1.6s infinite; }
+@keyframes blink { 50% { opacity: 0.25; } }
+.chip.tl { left: 16px; top: 16px; }
+.caption .rec { display: inline-flex; align-items: center; gap: 8px; }
+.caption .rec i { width: 6px; height: 6px; border-radius: 50%; background: var(--coral); animation: blink 1.6s infinite; }
+.caption { display: flex; justify-content: space-between; gap: 16px 32px; flex-wrap: wrap; margin-top: 18px; font: 500 12px/1.5 var(--mono); letter-spacing: 0.04em; color: var(--dim); text-transform: uppercase; }
+.vtoggle {
+    position: absolute; right: 14px; bottom: 14px; z-index: 3; width: 38px; height: 38px; border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(11, 12, 16, 0.6); color: #fff; cursor: pointer;
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); display: grid; place-items: center; opacity: 0.75; transition: opacity 0.2s;
+}
+.vtoggle:hover, .vtoggle:focus-visible { opacity: 1; }
+.vtoggle svg { width: 14px; height: 14px; }
+.vtoggle .i-play, .vtoggle.paused .i-pause { display: none; }
+.vtoggle.paused .i-play { display: block; }
 
-    /* --------------------------------------------------------- setup */
-    .steps {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-        counter-reset: step;
-    }
-    .steps > li {
-        position: relative;
-        margin-bottom: 16px;
-        padding-left: 44px;
-        counter-increment: step;
-    }
-    .steps > li::before {
-        content: counter(step);
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: var(--c);
-        color: #16131A;
-        font-size: 14px;
-        font-weight: 700;
-        line-height: 28px;
-        text-align: center;
-    }
-    /* the logo's colors: the play button's coral and pink, the timeline's blue and green */
-    .steps > li:nth-child(1) { --c: #FF8B5C; }
-    .steps > li:nth-child(2) { --c: #FF6D78; }
-    .steps > li:nth-child(3) { --c: #6E9CF5; }
-    .steps > li:nth-child(4) { --c: #4FCDA2; }
-    .steps > li:nth-child(5) { --c: #FF8B5C; }
+/* ---------- Sections ---------- */
+.sec { padding: clamp(110px, 15vw, 210px) 0 0; position: relative; }
+.sec-head { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.62fr); gap: 32px 64px; align-items: end; margin-bottom: clamp(48px, 6vw, 80px); }
+.sec-head .lede { padding-bottom: 8px; }
+.sec-head.solo { grid-template-columns: 1fr; }
 
-    .callout {
-        margin: 28px 0 0;
-        padding: 16px 20px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-left: 3px solid var(--accent);
-        border-radius: 8px;
-        scroll-margin-top: 24px;
-    }
-    .callout h3 { margin: 0 0 6px; font-size: 16px; }
-    .callout p, .callout li { font-size: 15px; }
-    .callout p { margin: 0 0 8px; }
-    .callout p:last-child { margin-bottom: 0; }
-    .callout ol { margin: 0 0 8px; padding-left: 20px; }
-    .callout li { margin-bottom: 4px; }
+/* ---------- Agent mock ---------- */
+.agent {
+    display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+    border-radius: 20px; overflow: hidden; border: 1px solid var(--line-2);
+    background: #0E0F14; box-shadow: 0 60px 120px -50px rgba(0, 0, 0, 0.95);
+    font-size: 13px; line-height: 1.45;
+}
+.chat { display: flex; flex-direction: column; border-right: 1px solid var(--line); background: #101117; height: 0; min-height: 100%; }
+.chat-tabs { display: flex; gap: 2px; padding: 10px 10px 0; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--dim); }
+.chat-tabs span { padding: 7px 10px 9px; border-bottom: 2px solid transparent; }
+.chat-tabs .on { color: var(--text); border-bottom-color: var(--coral); }
+.chat-input .undo { white-space: nowrap; font: 500 10.5px var(--mono); color: var(--muted); padding: 2px 7px; border: 1px solid var(--line-2); border-radius: 6px; opacity: 0; transform: translateY(4px); transition: 0.5s var(--ease); }
+.chat-input .undo.show { opacity: 1; transform: none; }
+.chat-body { position: relative; flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; padding: 14px 14px 18px; display: flex; flex-direction: column; gap: 8px; }
+.chat-body::-webkit-scrollbar { display: none; }
+.msg { padding: 10px 12px; border-radius: 12px; animation: pop 0.5s var(--ease) both; }
+.msg.user { background: #22242E; color: #E8E6E1; margin-left: 18px; border-bottom-right-radius: 4px; min-height: 2.9em; }
+.msg.user .caret { display: inline-block; width: 7px; height: 1.05em; vertical-align: -2px; background: var(--coral); margin-left: 1px; animation: blink 0.9s steps(1) infinite; }
+.msg.ai { color: #D9D7D2; padding: 6px 2px; }
+.msg.ai b { color: var(--text); font-weight: 600; }
+.tool { display: grid; grid-template-columns: 14px auto 1fr; gap: 8px; align-items: baseline; padding: 6px 10px; border-radius: 8px; background: rgba(255, 255, 255, 0.025); border: 1px solid var(--line); animation: pop 0.45s var(--ease) both; }
+.tool code { font-size: 11px; color: #C9C7C2; }
+.tool span { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.tool .st { width: 10px; height: 10px; border-radius: 50%; align-self: center; border: 1.5px solid var(--dim); border-top-color: transparent; animation: spin 0.7s linear infinite; }
+.tool.ok .st { border: 0; animation: none; background: center / 10px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 5.2 4 7.6 8.6 2.6' fill='none' stroke='%238CD9A6' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pop { from { opacity: 0; transform: translateY(8px); } }
+.chat-input { align-items: center; margin: 0 12px 12px; padding: 8px 8px 8px 12px; border-radius: 10px; border: 1px solid var(--line-2); color: var(--dim); display: flex; justify-content: space-between; font-size: 12.5px; }
+.edit { display: flex; flex-direction: column; min-width: 0; background: #0C0D11; }
+.viewer-wrap { padding: 18px 18px 0; display: flex; justify-content: center; background: #090A0D; }
+.viewer { position: relative; width: 100%; max-width: 760px; aspect-ratio: 16 / 9; background: #000; overflow: hidden; border-radius: 4px; }
+.viewer img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.6s; }
+.viewer img.on { opacity: 1; }
+.viewer.playing img { transition: none; }
+.viewer .l3 { inset: auto; left: 73.54%; top: 60.46%; width: 25%; height: auto; object-fit: contain; transition: opacity 0.35s; }
+.viewer-empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: var(--dim); font: 500 11px/1.7 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; transition: opacity 0.4s; }
+.viewer-tc { position: absolute; left: 10px; bottom: 8px; font: 500 11px var(--mono); color: rgba(255, 255, 255, 0.82); text-shadow: 0 1px 3px #000; font-variant-numeric: tabular-nums; }
+.readouts { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: #090A0D; margin-top: 18px; }
+.readouts div { padding: 12px 16px; border-left: 1px solid var(--line); }
+.readouts div:first-child { border-left: 0; }
+.readouts small { display: block; font: 500 10px var(--mono); letter-spacing: 0.1em; color: var(--dim); text-transform: uppercase; margin-bottom: 4px; }
+.readouts b { font: 500 clamp(17px, 1.7vw, 24px)/1.1 var(--sans); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; transition: color 0.4s; }
+.readouts b.hot { color: var(--coral); }
+.tl { position: relative; padding: 0 0 14px; user-select: none; }
+.tl-ruler, .tl-row { display: grid; grid-template-columns: 38px 1fr; }
+.tl-ruler { height: 24px; border-bottom: 1px solid var(--line); font: 500 9.5px var(--mono); color: var(--dim); }
+.tl-ruler .lane { position: relative; }
+.tl-ruler .lane span { position: absolute; top: 7px; transform: translateX(4px); white-space: nowrap; }
+.tl-ruler .lane span::before { content: ""; position: absolute; left: -4px; top: -7px; height: 6px; width: 1px; background: var(--line-2); }
+.tl-row { height: 34px; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+.tl-row.v2 { height: 26px; }
+.tl-row.a1 { height: 40px; }
+.tl-row .hd { display: grid; place-items: center; font: 600 10px var(--mono); color: var(--dim); background: #111218; border-right: 1px solid var(--line); }
+.lane { position: relative; overflow: hidden; }
+.clip {
+    position: absolute; top: 3px; bottom: 3px; border-radius: 3px; overflow: hidden;
+    background: var(--clip-v); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), inset -1px 0 0 rgba(0, 0, 0, 0.5);
+    font: 600 9px var(--mono); color: rgba(255, 255, 255, 0.8); padding: 3px 4px; white-space: nowrap;
+    opacity: 0; transform: translateY(-10px) scaleX(0.6); transform-origin: 0 50%;
+    transition: opacity 0.4s, transform 0.55s var(--ease), box-shadow 0.3s;
+}
+.clip.b { background: var(--clip-v2); }
+.clip.g { background: var(--clip-g); }
+.clip.au { background: var(--clip-a); padding: 0; }
+.clip.in { opacity: 1; transform: none; }
+.clip.hit { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), inset -2px 0 0 var(--coral), 3px 0 12px -2px rgba(255, 125, 94, 0.9); }
+.clip svg { position: absolute; left: 0; right: 0; top: 0; width: 100%; height: 100%; transform-origin: 50% 50%; transform: scaleY(var(--amp, 0.22)); transition: transform 0.8s var(--ease); }
+.clip .gain { position: absolute; left: 0; right: 0; height: 1px; background: #F4D35E; top: var(--gy, 70%); transition: top 0.8s var(--ease); opacity: 0.9; }
+.playhead { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--coral); left: 38px; pointer-events: none; box-shadow: 0 0 8px rgba(255, 125, 94, 0.8); transform: translateX(var(--x, 0px)); opacity: 0; transition: opacity 0.3s; }
+.playhead::before { content: ""; position: absolute; top: 0; left: -5px; border: 5px solid transparent; border-top: 7px solid var(--coral); }
+.playhead.on { opacity: 1; }
+.agent-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 18px; font: 500 12px/1.5 var(--mono); color: var(--dim); letter-spacing: 0.04em; text-transform: uppercase; }
+.replay { font: 500 12px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); background: none; border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 12px; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; }
+.replay:hover { background: rgba(255, 255, 255, 0.05); }
+.replay svg { width: 13px; height: 13px; }
 
-    details {
-        margin-top: 16px;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-    }
-    summary {
-        padding: 14px 20px;
-        font-weight: 600;
-        color: var(--text-strong);
-        cursor: pointer;
-        list-style: none;
-    }
-    summary::-webkit-details-marker { display: none; }
-    summary::before {
-        content: "";
-        display: inline-block;
-        width: 6px;
-        height: 6px;
-        margin: 0 12px 2px 0;
-        border-right: 2px solid var(--muted);
-        border-bottom: 2px solid var(--muted);
-        transform: rotate(-45deg);
-        transition: transform 120ms;
-    }
-    details[open] summary::before { transform: rotate(45deg); }
-    .details-body { padding: 0 20px 18px; }
-    .details-body h3 { margin: 12px 0 6px; font-size: 16px; }
-    .details-body h3 ~ h3 { margin-top: 24px; }
+/* ---------- Stats ---------- */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: clamp(80px, 10vw, 130px); border-top: 1px solid var(--line); }
+.stat { padding: 28px 24px 0 0; }
+.stat + .stat { padding-left: 24px; border-left: 1px solid var(--line); }
+.stat b { display: block; font: 500 clamp(52px, 6.2vw, 96px)/1 var(--sans); letter-spacing: -0.05em; font-variant-numeric: tabular-nums; font-stretch: 94%; }
+.stat span { display: block; margin-top: 12px; color: var(--muted); font-size: 16px; max-width: 15em; }
 
-    .path {
-        display: flex;
-        align-items: stretch;
-        margin: 8px 0 12px;
-        background: #15161E;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-    }
-    .path code {
-        flex: 1;
-        min-width: 0;
-        padding: 9px 12px;
-        overflow-x: auto;
-        white-space: nowrap;
-        font: 13px/1.5 ui-monospace, "SF Mono", Menlo, monospace;
-        color: var(--text);
-    }
-    .copy {
-        flex: none;
-        padding: 0 14px;
-        border: 0;
-        border-left: 1px solid var(--border);
-        border-radius: 0 6px 6px 0;
-        background: transparent;
-        color: var(--link);
-        font-family: inherit;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-    }
-    .copy:hover { background: var(--surface); }
+/* ---------- Split rows ---------- */
+.split { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
+.list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.list li { padding: 18px 0; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 16px; }
+.list li b { display: block; color: var(--text); font-weight: 500; font-size: 17px; margin-bottom: 3px; }
+.list .tag { display: inline-block; font: 500 10px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; margin-right: 6px; vertical-align: 2px; }
 
-    /* ------------------------------------------------------ lightbox */
-    .lightbox {
-        position: fixed;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(10, 10, 14, 0.92);
-        z-index: 100;
-        cursor: zoom-out;
-        padding: 24px;
-    }
-    .lightbox[hidden] { display: none; }
-    .lightbox img {
-        max-width: 96vw;
-        max-height: 92vh;
-        width: auto;
-        height: auto;
-        border-radius: 10px;
-        border: 1px solid var(--border);
-        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
-    }
-    .lightbox-close {
-        position: absolute;
-        top: 16px;
-        right: 16px;
-        width: 40px;
-        height: 40px;
-        border: 1px solid var(--border);
-        border-radius: 50%;
-        background: var(--surface);
-        color: var(--text-strong);
-        font-size: 22px;
-        line-height: 1;
-        cursor: pointer;
-    }
+/* ---------- Tabs ---------- */
+.tabs { display: grid; grid-template-columns: minmax(260px, 0.42fr) minmax(0, 1fr); gap: clamp(28px, 4vw, 64px); align-items: center; }
+.tablist { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.tabs > *, .split > *, .sec-head > *, .hero-grid > * { min-width: 0; }
+.tab {
+    all: unset; cursor: pointer; display: block; padding: 22px 0 22px; border-bottom: 1px solid var(--line); position: relative;
+}
+.tab h3 { font-size: clamp(22px, 2.2vw, 30px); letter-spacing: -0.025em; color: var(--dim); transition: color 0.35s; display: flex; align-items: baseline; gap: 14px; }
+.tab h3 small { font: 500 11px var(--mono); letter-spacing: 0.08em; color: var(--dim); }
+.tab p { margin: 0; color: var(--muted); font-size: 16px; display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.5s var(--ease), margin 0.5s var(--ease), opacity 0.4s; opacity: 0; }
+.tab p > span { overflow: hidden; }
+.tab[aria-selected="true"] h3 { color: var(--text); }
+.tab[aria-selected="true"] p { grid-template-rows: 1fr; margin-top: 10px; opacity: 1; }
+.tab .bar { position: absolute; left: 0; bottom: -1px; height: 1px; width: 100%; background: var(--grad); transform-origin: 0 50%; transform: scaleX(0); }
+.tab[aria-selected="true"] .bar { transform: scaleX(var(--t, 0)); }
+.tab:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+.stage { position: relative; }
+.stage .frame { aspect-ratio: var(--ar, 16 / 10); display: grid; place-items: center; background: #08090C; }
+.panel { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; transition: opacity 0.5s; pointer-events: none; }
+.panel.on { opacity: 1; pointer-events: auto; }
+.panel video { max-width: 100%; max-height: 100%; width: auto; height: auto; }
 
-    /* -------------------------------------------------------- footer */
-    footer {
-        margin-top: 88px;
-        padding-top: 24px;
-        border-top: 1px solid var(--border);
-        text-align: center;
-        color: var(--muted);
-        font-size: 13px;
-    }
-    footer p { margin: 0 0 6px; }
-    footer a { text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
-    .sep { margin: 0 6px; opacity: 0.5; }
+/* ---------- Compare ---------- */
+.compare { position: relative; aspect-ratio: 16 / 9; --pos: 50%; touch-action: pan-y; cursor: ew-resize; }
+.compare picture, .compare img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.compare .before { clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
+.compare .handle { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 1px; background: rgba(255, 255, 255, 0.9); pointer-events: none; box-shadow: 0 0 12px rgba(0, 0, 0, 0.6); }
+.compare .knob { position: absolute; top: 50%; left: 0; width: 44px; height: 44px; transform: translate(-50%, -50%); border-radius: 50%; background: rgba(11, 12, 16, 0.55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); display: grid; place-items: center; }
+.compare .knob svg { width: 20px; height: 20px; }
+.compare input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+.compare input:focus-visible ~ .handle .knob { outline: 2px solid var(--coral); outline-offset: 3px; }
+.compare .chip.tr { right: 16px; top: 16px; left: auto; }
+.compare .chip { pointer-events: none; }
+.hint { font: 500 12px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); margin-top: 16px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 
-    @media (max-width: 860px) {
-        .row, .row.flip { grid-template-columns: 1fr; gap: 18px; }
-        .row.flip .clip { order: 0; }
-        .showcase { gap: 48px; }
-    }
-    @media (max-width: 620px) {
-        .wrap { padding-top: 48px; }
-        .shots, .features { grid-template-columns: 1fr; }
-        section { margin-top: 56px; }
-        .btn { min-width: 0; width: 100%; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-        * { transition: none !important; }
-    }
+/* ---------- Transcript mock ---------- */
+.ts { border-radius: 18px; border: 1px solid var(--line-2); background: #0F1015; overflow: hidden; position: relative; }
+.ts-head { display: flex; gap: 2px; padding: 10px 14px 0; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--dim); }
+.ts-head span { padding: 7px 10px 9px; border-bottom: 2px solid transparent; }
+.ts-head .on { color: var(--text); border-bottom-color: var(--coral); }
+.ts-search { margin: 14px 18px 4px; padding: 9px 12px; border-radius: 9px; border: 1px solid var(--line-2); font-size: 13px; color: var(--dim); display: flex; gap: 8px; align-items: center; }
+.ts-search svg { width: 13px; height: 13px; }
+.ts-body { padding: 6px 8px 14px; }
+.sent { display: grid; grid-template-columns: 92px 1fr; gap: 14px; padding: 12px 10px; border-radius: 10px; transition: background-color 0.35s; position: relative; }
+.sent .t { font: 500 11px/1.9 var(--mono); color: var(--dim); font-variant-numeric: tabular-nums; }
+.sent p { margin: 0; font-size: clamp(16px, 1.45vw, 19px); line-height: 1.5; color: #6E707C; }
+.sent p .wd { transition: color 0.12s; }
+.sent p .wd.said { color: #E4E2DD; }
+.sent p .wd.now { color: #fff; background: rgba(255, 125, 94, 0.22); box-shadow: 0 0 0 2px rgba(255, 125, 94, 0.22); border-radius: 3px; }
+.sent.sel { background: rgba(61, 97, 158, 0.28); box-shadow: inset 0 0 0 1px rgba(110, 150, 230, 0.35); }
+.ctx { position: absolute; right: 24px; top: 60%; z-index: 3; min-width: 190px; padding: 5px; border-radius: 9px; background: rgba(36, 38, 48, 0.94); border: 1px solid var(--line-2); box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8); font-size: 13px; opacity: 0; transform: scale(0.96); transform-origin: 0 0; transition: opacity 0.2s, transform 0.25s var(--ease); pointer-events: none; }
+.ctx.on { opacity: 1; transform: none; }
+.ctx div { padding: 5px 10px; border-radius: 5px; color: #D7D5D0; }
+.ctx div.hi { background: #3C68C8; color: #fff; }
+.ctx hr { border: 0; border-top: 1px solid var(--line-2); margin: 4px 6px; }
+
+/* ---------- Export cards ---------- */
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+.card { background: var(--bg); padding: 28px 26px 30px; min-height: 280px; display: flex; flex-direction: column; transition: background-color 0.35s; }
+.card:hover { background: var(--bg-2); }
+.file { display: inline-flex; align-items: center; gap: 10px; align-self: flex-start; font: 500 12px var(--mono); color: var(--text); padding: 8px 11px 8px 9px; border-radius: 8px; background: var(--bg-3); border: 1px solid var(--line-2); }
+.file i { width: 18px; height: 22px; border-radius: 2px 6px 2px 2px; background: var(--fc, var(--coral)); position: relative; flex: none; }
+.file i::after { content: ""; position: absolute; right: 0; top: 0; border: 3.5px solid var(--bg-3); border-left-color: rgba(0, 0, 0, 0.3); border-bottom-color: rgba(0, 0, 0, 0.3); }
+.card h3 { margin-top: 56px; font-size: 24px; letter-spacing: -0.02em; }
+.card h3 small { font: 500 11px var(--mono); color: var(--dim); letter-spacing: 0.06em; margin-left: 6px; }
+.card ul { margin: 12px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: 15px; }
+.card li { padding: 3px 0 3px 16px; position: relative; }
+.card li::before { content: ""; position: absolute; left: 0; top: 0.8em; width: 6px; height: 1px; background: var(--dim); }
+
+/* ---------- Everything else ---------- */
+.more { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 48px; margin-top: clamp(64px, 8vw, 110px); }
+.more div { padding: 22px 0; border-top: 1px solid var(--line); }
+.more b { display: block; font-weight: 500; font-size: 18px; letter-spacing: -0.01em; margin-bottom: 4px; }
+.more span { color: var(--muted); font-size: 15.5px; }
+
+/* ---------- Statement ---------- */
+.statement { font-size: clamp(32px, 4.6vw, 68px); line-height: 1.08; letter-spacing: -0.035em; font-weight: 500; max-width: 18.5em; margin: 0; font-stretch: 96%; }
+.statement em { letter-spacing: -0.01em; }
+.js .statement .sw { opacity: 0.16; transition: opacity 0.25s linear; }
+.js .statement .sw.lit { opacity: 1; }
+.statement-note { margin-top: 36px; max-width: 40em; color: var(--muted); font-size: 16px; }
+
+/* ---------- Get started ---------- */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; counter-reset: s; }
+.steps li { background: var(--bg); padding: 28px 26px 32px; counter-increment: s; color: var(--muted); font-size: 16px; }
+.steps li::before { content: "0" counter(s); display: block; font: 500 12px var(--mono); color: var(--coral); letter-spacing: 0.08em; margin-bottom: 40px; }
+.steps b { display: block; color: var(--text); font-weight: 500; font-size: 20px; letter-spacing: -0.015em; margin-bottom: 8px; }
+.steps a { color: var(--text); text-underline-offset: 3px; }
+.steps code, .faq code, .callout code { font-size: 0.86em; color: #E0DDD7; }
+.callout { margin-top: 24px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px 48px; align-items: center; padding: 30px 32px; border-radius: 18px; background: linear-gradient(120deg, rgba(255, 125, 94, 0.09), rgba(255, 109, 120, 0.03) 60%), var(--bg-2); border: 1px solid rgba(255, 125, 94, 0.22); }
+.callout h3 { font-size: 22px; letter-spacing: -0.015em; margin-bottom: 10px; }
+.callout ol { margin: 0; padding-left: 20px; color: var(--muted); font-size: 16px; }
+.callout ol li { padding: 2px 0; }
+.callout strong { color: var(--text); font-weight: 600; }
+.callout p { margin: 12px 0 0; color: var(--muted); font-size: 15px; }
+.mac-dialog { width: 290px; padding: 16px; border-radius: 14px; background: rgba(40, 41, 48, 0.96); border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.9); font-size: 12.5px; color: #CFCDC8; }
+.mac-dialog .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.mac-dialog .row span { line-height: 1.35; }
+.mac-dialog .oa { flex: none; padding: 4px 11px; border-radius: 6px; background: #3A3B44; color: #fff; font-weight: 500; box-shadow: 0 0 0 0 rgba(255, 125, 94, 0.0); animation: oa 2.4s var(--ease) infinite; }
+@keyframes oa { 0%, 30% { box-shadow: 0 0 0 0 rgba(255, 125, 94, 0.6); } 70%, 100% { box-shadow: 0 0 0 8px rgba(255, 125, 94, 0); } }
+.mac-dialog small { display: block; color: #8F909A; font-size: 11px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.faq { margin-top: clamp(72px, 9vw, 120px); display: grid; grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr); gap: 32px 64px; }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq details:first-of-type { border-top: 1px solid var(--line); }
+.faq summary { list-style: none; cursor: pointer; padding: 20px 40px 20px 0; position: relative; font-size: 18px; font-weight: 500; letter-spacing: -0.01em; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: ""; position: absolute; right: 4px; top: 50%; width: 12px; height: 12px; margin-top: -6px; background: linear-gradient(var(--muted), var(--muted)) center / 12px 1.5px no-repeat, linear-gradient(var(--muted), var(--muted)) center / 1.5px 12px no-repeat; transition: transform 0.3s var(--ease); }
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq .ans { padding: 0 0 22px; color: var(--muted); font-size: 16px; max-width: 42em; }
+.faq .ans p { margin: 0 0 10px; }
+.path { display: flex; align-items: center; gap: 10px; margin: 8px 0; padding: 8px 8px 8px 14px; border-radius: 9px; background: var(--bg-2); border: 1px solid var(--line); max-width: 560px; }
+.path code { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 13px; color: var(--text); }
+.copy { flex: none; font: 500 11px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line-2); background: transparent; color: var(--muted); cursor: pointer; }
+.copy:hover { color: var(--text); }
+
+/* ---------- Closing ---------- */
+.closing { position: relative; margin-top: clamp(120px, 16vw, 220px); min-height: min(92vh, 940px); display: flex; align-items: center; overflow: hidden; isolation: isolate; }
+.closing picture { position: absolute; inset: 0 0 0 24%; z-index: -2; }
+.closing picture img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 18% 40%; }
+.closing picture img { transform: scale(var(--z, 1.08)); transform-origin: 60% 40%; will-change: transform; }
+.closing::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, var(--bg) 0%, var(--bg) 24%, rgba(11, 12, 16, 0.6) 40%, rgba(11, 12, 16, 0) 62%), linear-gradient(0deg, var(--bg) 0%, transparent 22%), linear-gradient(180deg, var(--bg) 0%, transparent 18%); }
+.closing .display { font-size: clamp(60px, 10vw, 164px); margin-bottom: 36px; }
+.closing .lede { margin-bottom: 30px; color: #C4C3C9; }
+
+/* ---------- Footer ---------- */
+footer { padding: 64px 0 56px; border-top: 1px solid var(--line); margin-top: 40px; }
+.foot { display: grid; grid-template-columns: 1.2fr 0.5fr 1.6fr; gap: 40px; }
+.foot h4 { margin: 0 0 14px; font: 500 11px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+.foot ul { list-style: none; margin: 0; padding: 0; font-size: 15px; }
+.foot li { padding: 3px 0; }
+.foot ul a { color: var(--muted); text-decoration: none; }
+.foot ul a:hover { color: var(--text); }
+.foot .tools { columns: 3; column-gap: 24px; }
+.foot p { margin: 14px 0 0; color: var(--dim); font: 500 12px/1.6 var(--mono); letter-spacing: 0.04em; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+    .nav-tc { display: none; }
+    .nav-links { margin-left: auto; }
+    .agent { grid-template-columns: 1fr; }
+    .chat { border-right: 0; border-bottom: 1px solid var(--line); height: auto; min-height: 0; }
+    .chat-body { height: 300px; flex: none; }
+    .cards, .steps { grid-template-columns: repeat(2, 1fr); }
+    .more { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 900px) {
+    .nav-links { display: none; }
+    .nav-in .btn { margin-left: auto; }
+    .hero-grid, .sec-head, .split, .tabs, .faq, .callout { grid-template-columns: 1fr; }
+    .hero-side { padding-bottom: 0; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stat:nth-child(3) { padding-left: 0; border-left: 0; }
+    .stat:nth-child(n+3) { margin-top: 28px; border-top: 1px solid var(--line); }
+    .tablist { flex-direction: row; overflow-x: auto; scrollbar-width: none; gap: 20px; border-top: 0; }
+    .tab h3 { font-size: 19px; }
+    .tab { flex: 1 0 auto; padding: 14px 0; }
+    .tab p { display: none; }
+    .tab h3 small { display: none; }
+    .tabs .desc-m { display: block; }
+    .foot { grid-template-columns: 1fr 1fr; }
+    .foot > div:first-child { grid-column: 1 / -1; }
+    .mac-dialog { width: 100%; max-width: 340px; }
+}
+@media (max-width: 600px) {
+    body { font-size: 17px; }
+    .nav-in { height: 60px; gap: 12px; }
+    .brand span { font-size: 17px; }
+    .btn.small .lbl-long { display: none; }
+    .frame { border-radius: 12px; }
+    .readouts { grid-template-columns: repeat(2, 1fr); }
+    .readouts div:nth-child(3) { border-left: 0; }
+    .readouts div:nth-child(n+3) { border-top: 1px solid var(--line); }
+    .viewer-wrap { padding: 10px 10px 0; }
+    .chat-body { height: 260px; }
+    .cards, .steps, .more { grid-template-columns: 1fr; }
+    .card { min-height: 0; }
+    .card h3 { margin-top: 28px; }
+    .stat { padding-right: 12px; }
+    .stat + .stat { padding-left: 14px; }
+    .stat span { font-size: 14.5px; }
+    .sent { grid-template-columns: 1fr; gap: 2px; }
+    .callout { padding: 24px 20px; }
+    .foot .tools { columns: 2; }
+    .closing { min-height: 640px; align-items: flex-end; padding-bottom: 72px; }
+    .closing picture { inset: 0; }
+    .closing picture img { object-position: 45% 40%; }
+    .closing::before { background: linear-gradient(0deg, rgba(11, 12, 16, 0.96) 0%, rgba(11, 12, 16, 0.7) 45%, rgba(11, 12, 16, 0.1) 80%), linear-gradient(180deg, var(--bg) 0%, transparent 18%); }
+}
+.desc-m { display: none; color: var(--muted); font-size: 16px; margin: 0 0 18px; }
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .hero-frame { transform: none !important; }
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-    <header class="hero">
-        <img class="mark" src="images/logo.png" alt="" width="112" height="112">
-        <h1>SPEEDRUN</h1>
-        <p class="tagline">The Mac video editor where Claude builds your edit and you finish it by&nbsp;hand</p>
-        <div class="buttons">
-            <a class="btn" id="dl-dmg" href="https://github.com/tlatvys-ac/speedrun-app/releases/latest/download/Speedrun-0.2.0.dmg">
-                Download Speedrun
-                <small>macOS 26 · Apple silicon · free</small>
-            </a>
-        </div>
-        <p class="hero-notes">
-            Works with your Claude Code sign-in. Not notarized yet, so the first
-            launch takes one extra click. <a href="#unsigned">What to expect</a>
-        </p>
-        <div class="hero-media">
-            <video id="hero-video" class="autoplay" width="1800" height="1048" autoplay muted loop playsinline preload="auto" poster="images/hero-poster.jpg" aria-label="Speedrun with an empty timeline. A request is sent to Claude in the side panel: sync the two cameras, cut the Town Hall interview from three sections, grade with the LUTs, add the lower third and set dialogue to −16 LUFS. Claude's steps scroll by as it syncs, transcribes and reviews, and the timeline fills with twenty alternating wide and medium shots, the graded picture appears in the viewer and the lower third lands on V2. Then the cut plays.">
-                <source src="images/hero.mp4" type="video/mp4">
-            </video>
-            <button class="video-toggle" type="button" aria-label="Pause video">
-                <svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="2.5" width="3" height="11" rx="1"/><rect x="9.5" y="2.5" width="3" height="11" rx="1"/></svg>
-                <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.8v10.4a.8.8 0 0 0 1.2.7l8.4-5.2a.8.8 0 0 0 0-1.4L5.7 2.1a.8.8 0 0 0-1.2.7z"/></svg>
-            </button>
-        </div>
-        <p class="media-caption"><strong>One request, start to finish</strong> — Claude syncs two 4K cameras, transcribes, and cuts a 1:56 interview in 20 shots with the LUTs, the lower third and levels in place. 2 min 38 s of work, shown 12× faster.</p>
-    </header>
+<a class="skip" href="#main">Skip to content</a>
 
-    <main>
-    <section>
-        <h2 class="divider">About</h2>
-        <p class="lead">Speedrun is a lightweight video editor for the Mac.
-        Bring footage into a project, ask Claude to sync the cameras, pick the
-        cleanest mic, transcribe, and cut from your notes. The result is a
-        real multi-track timeline you can watch, trim and adjust.</p>
-        <p>Claude edits through Speedrun's own tools, so everything it does
-        lands on the timeline as it works, and a whole request is one undo
-        step. Export a movie when you're happy, or hand an EDL or Premiere XML
-        to Premiere for finishing.</p>
-    </section>
-
-    <section>
-        <h2 class="divider">See it work</h2>
-        <div class="showcase breakout">
-            <article class="row">
-                <figure class="clip">
-                    <video class="autoplay" width="940" height="690" muted loop playsinline preload="none" poster="images/trim-poster.jpg" aria-label="Trim mode on a cut between the wide and the medium. The viewer shows the outgoing frame (A) beside the incoming frame (B) above the timeline's yellow rollers. The cut rolls six frames earlier, then the B side and the A side are each trimmed while playing, with the frame counters running.">
-                        <source src="images/trim.mp4" type="video/mp4">
-                    </video>
-                    <button class="video-toggle" type="button" aria-label="Pause video">
-                        <svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="2.5" width="3" height="11" rx="1"/><rect x="9.5" y="2.5" width="3" height="11" rx="1"/></svg>
-                        <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.8v10.4a.8.8 0 0 0 1.2.7l8.4-5.2a.8.8 0 0 0 0-1.4L5.7 2.1a.8.8 0 0 0-1.2.7z"/></svg>
-                    </button>
-                </figure>
-                <div class="row-text">
-                    <span class="eyebrow">Trim mode</span>
-                    <h3>Trim the way Media Composer does</h3>
-                    <p>Click a cut and press <kbd>U</kbd>. The viewer splits into
-                    the outgoing and incoming frames, and <kbd>J</kbd> / <kbd>L</kbd>
-                    play through the side you're trimming, with sound.
-                    <kbd>K</kbd> sets the edit where you stopped.</p>
-                    <p>Roll both sides, or click A or B to trim just one. Everything
-                    after it moves on every track, so picture and sound stay in sync.</p>
-                    <p class="fine">Shown: a 6-frame roll, then the B side and the A side trimmed on the fly.</p>
-                </div>
-            </article>
-
-            <article class="row flip">
-                <figure class="clip">
-                    <video class="autoplay" width="1600" height="936" muted loop playsinline preload="none" poster="images/markers-poster.jpg" aria-label="A red marker named Tighten this shot is added on the timeline, and the marker editor opens with its note, color and the Feedback tag. In the Claude panel the request is: I left you a feedback marker, can you take care of it? Claude trims the shot by about two seconds without cutting the sentence, switches angle so there is no jump cut, and the marker is tagged Done in the Markers tab.">
-                        <source src="images/markers.mp4" type="video/mp4">
-                    </video>
-                    <button class="video-toggle" type="button" aria-label="Pause video">
-                        <svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="2.5" width="3" height="11" rx="1"/><rect x="9.5" y="2.5" width="3" height="11" rx="1"/></svg>
-                        <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.8v10.4a.8.8 0 0 0 1.2.7l8.4-5.2a.8.8 0 0 0 0-1.4L5.7 2.1a.8.8 0 0 0-1.2.7z"/></svg>
-                    </button>
-                </figure>
-                <div class="row-text">
-                    <span class="eyebrow">Markers</span>
-                    <h3>Leave notes, and Claude works through them</h3>
-                    <p>Press <kbd>M</kbd> to drop a marker, and <kbd>M</kbd> again
-                    to give it a name, a note, a color and tags. Put them on the
-                    sequence for revisions, or on the footage itself to flag a
-                    great answer.</p>
-                    <p>Claude reads every marker. It builds first cuts from your
-                    Selects, and works through Feedback, tagging each note Done.</p>
-                    <p class="fine">Claude's minute of work is shown 6× faster.</p>
-                </div>
-            </article>
-
-            <article class="row">
-                <figure class="clip">
-                    <video class="autoplay" width="1280" height="674" muted loop playsinline preload="none" poster="images/transform-poster.jpg" aria-label="The Scott Stroud lower third gets a bounding box in the viewer. It moves left and up, scales up from 120 to 160 percent, rotates a few degrees and back, and the Position and Scale values in the Properties panel update when it is let go.">
-                        <source src="images/transform.mp4" type="video/mp4">
-                    </video>
-                    <button class="video-toggle" type="button" aria-label="Pause video">
-                        <svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="2.5" width="3" height="11" rx="1"/><rect x="9.5" y="2.5" width="3" height="11" rx="1"/></svg>
-                        <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.8v10.4a.8.8 0 0 0 1.2.7l8.4-5.2a.8.8 0 0 0 0-1.4L5.7 2.1a.8.8 0 0 0-1.2.7z"/></svg>
-                    </button>
-                </figure>
-                <div class="row-text">
-                    <span class="eyebrow">Motion</span>
-                    <h3>Move, scale and rotate right in the viewer</h3>
-                    <p>Double-click a clip in the viewer for its bounding box. Drag
-                    to move, pull a corner to scale, and swing just outside a corner
-                    to rotate. The picture follows live.</p>
-                    <p>The Properties panel works like Premiere's Effect Controls,
-                    with keyframes for position, scale, rotation, opacity and volume.
-                    Media comes in at its own size, 100%.</p>
-                </div>
-            </article>
-
-            <article class="row flip">
-                <figure class="clip">
-                    <video class="autoplay" width="1080" height="896" muted loop playsinline preload="none" poster="images/source-poster.jpg" aria-label="The medium camera file opens in the source monitor beside the program monitor. An in point is marked, it plays for three seconds, an out point is marked, and the range is inserted into the timeline at the playhead, pushing the later shots to the right.">
-                        <source src="images/source.mp4" type="video/mp4">
-                    </video>
-                    <button class="video-toggle" type="button" aria-label="Pause video">
-                        <svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="2.5" width="3" height="11" rx="1"/><rect x="9.5" y="2.5" width="3" height="11" rx="1"/></svg>
-                        <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.8v10.4a.8.8 0 0 0 1.2.7l8.4-5.2a.8.8 0 0 0 0-1.4L5.7 2.1a.8.8 0 0 0-1.2.7z"/></svg>
-                    </button>
-                </figure>
-                <div class="row-text">
-                    <span class="eyebrow">Source monitor</span>
-                    <h3>Find a moment, mark it, cut it in</h3>
-                    <p>Double-click a clip in the Project panel to open it in the
-                    source monitor, with the camera's timecode and its LUT. Mark
-                    in and out with <kbd>I</kbd> and <kbd>O</kbd>.</p>
-                    <p>Press <kbd>,</kbd> to insert at the playhead, moving
-                    everything after it, or <kbd>.</kbd> to overwrite. Press
-                    <kbd>F</kbd> to match frame back to the source.</p>
-                </div>
-            </article>
-        </div>
-    </section>
-
-    <section>
-        <h2 class="divider">What it looks like</h2>
-        <div class="gallery breakout">
-            <div class="shots one">
-                <figure>
-                    <button class="shot" type="button" aria-haspopup="dialog">
-                        <picture>
-                            <source type="image/avif" srcset="images/editor.avif">
-                            <img src="images/editor.jpg" width="2400" height="1302" loading="lazy" decoding="async" alt="The Speedrun window: the Project panel with Footage and Graphics bins, the source monitor showing the medium camera, the program monitor showing the graded wide shot with the Scott Stroud lower third, Claude's summary of the cut in the side panel, and a timeline with the lower third on V2 above twenty alternating shots on V1 and their dialogue on A1, next to the audio meter">
-                        </picture>
-                    </button>
-                    <figcaption><strong>The editor</strong> — Project, source and program monitors, Claude, and the timeline</figcaption>
-                </figure>
-            </div>
-            <h3>Side panel</h3>
-            <div class="shots panels">
-                <figure>
-                    <button class="shot" type="button" aria-haspopup="dialog">
-                        <picture>
-                            <source type="image/avif" srcset="images/transcript.avif">
-                            <img src="images/transcript.png" width="938" height="1044" loading="lazy" decoding="async" alt="The Transcript tab: a searchable list of everything said, with a time for each sentence and a film icon on the lines used in the cut, from 'Tell me your name, your business, or agency' to 'My name is Scott Stroud. I'm with MHCRM.'">
-                        </picture>
-                    </button>
-                    <figcaption><strong>Transcript</strong> — click a line to jump there, right-click to cut it in</figcaption>
-                </figure>
-                <figure>
-                    <button class="shot" type="button" aria-haspopup="dialog">
-                        <picture>
-                            <source type="image/avif" srcset="images/properties.avif">
-                            <img src="images/properties.png" width="938" height="1044" loading="lazy" decoding="async" alt="The Properties tab for a wide shot: its start, duration, source timecode and sync group, then Motion (position, scale, rotation with keyframe stopwatches, Fit to Frame and 100%), Opacity with fades, and Volume at +23.5 dB on the right channel">
-                        </picture>
-                    </button>
-                    <figcaption><strong>Properties</strong> — motion, opacity, volume and color, all keyframeable</figcaption>
-                </figure>
-            </div>
-        </div>
-    </section>
-
-    <section>
-        <h2 class="divider">Features</h2>
-        <ul class="features">
-            <li><strong>Claude builds the first cut</strong>Waveform sync of multiple cameras, the cleanest mic channel, on-device transcription, and a cut from your notes with edits snapped to pauses</li>
-            <li><strong>A real timeline</strong>Drag, trim, ripple, roll, split and close gaps. Crossfades, fades, gain lines and level keyframes, with snapping on <kbd>S</kbd> and audio scrubbing on <kbd>⇧S</kbd></li>
-            <li><strong>Edit by what was said</strong>A transcript with word timings. Search it, jump to a line, or cut it straight into the timeline</li>
-            <li><strong>Color</strong>A .cube LUT plus exposure, temperature, tint, contrast, saturation and black level, set per clip or as a source's default</li>
-            <li><strong>Bins and sequences</strong>Nested bins for media, any number of sequences, and duplicates for trying an alternate cut</li>
-            <li><strong>Proxies when you need them</strong>Speedrun times how fast each file decodes and makes 1080p proxies for heavy footage. Export always uses the originals</li>
-            <li><strong>Hand off to Premiere</strong>Premiere XML with every track, levels, fades, dissolves, motion, keyframes and markers. Also CMX 3600 EDLs and SRT captions</li>
-            <li><strong>Export a movie</strong>H.264, HEVC or ProRes, loudness-normalized to −16 LUFS, starting at timecode 01:00:00:00</li>
-            <li><strong>Media macOS can't play</strong>QuickTime Animation graphics are converted to ProRes 4444 (alpha kept) when you import them</li>
-            <li><strong>Your footage stays put</strong>Media is used in place, never copied or uploaded. Claude reads transcripts and the timeline, and looks at still frames to check its work</li>
+<nav class="nav" id="nav" aria-label="Main">
+    <div class="wrap nav-in">
+        <a class="brand" href="#top" aria-label="Speedrun home"><img src="images/logo.png" alt="" width="28" height="28"><span>Speedrun</span></a>
+        <ul class="nav-links">
+            <li><a href="#claude">Claude</a></li>
+            <li><a href="#notes">Markers</a></li>
+            <li><a href="#hands">By hand</a></li>
+            <li><a href="#color">Color</a></li>
+            <li><a href="#export">Export</a></li>
+            <li><a href="#start">Get started</a></li>
         </ul>
-    </section>
+        <div class="nav-tc" aria-hidden="true"><i></i><span id="tc">01:00:00:00</span></div>
+        <a class="btn small dl" href="https://github.com/tlatvys-ac/speedrun-app/releases/latest/download/Speedrun-0.2.0.dmg">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8.5M4.5 7 8 10.5 11.5 7M3 13.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Download<span class="lbl-long"> for Mac</span></span>
+        </a>
+        <div class="progress" id="progress"></div>
+    </div>
+</nav>
 
-    <section>
-        <h2 class="divider">Setup</h2>
-        <ol class="steps">
-            <li><strong>Get Claude Code.</strong> Speedrun runs your own
-                <a href="https://docs.anthropic.com/en/docs/claude-code/setup">Claude Code</a>
-                and its sign-in, so any plan or company setup that works in
-                Terminal works here. Run <code>claude</code> in Terminal once to
-                sign in.</li>
-            <li><strong>Download Speedrun.</strong> It's one
-                <code>Speedrun-<span class="v">0.2.0</span>.dmg</code> file.</li>
-            <li><strong>Install it.</strong> Open the .dmg and drag Speedrun
-                into Applications.</li>
-            <li><strong>Open it once from Privacy &amp; Security.</strong> The
-                first launch needs the extra step below. After that it opens
-                like any app.</li>
-            <li><strong>Make a project.</strong> Choose <em>New Project</em>,
-                drag in your footage, then open the <em>Claude</em> tab and say
-                what you want, such as "Sync the cameras and cut the intro from
-                my notes."</li>
-        </ol>
+<main id="main">
+<header class="hero" id="top">
+    <div class="wrap">
+        <p class="eyebrow reveal"><span class="flag" style="--c:#4CCC66"></span>Speedrun <span class="v">0.2</span><span class="sep"></span><span>A video editor for the Mac</span></p>
+        <h1 class="display" data-split><span class="l">Ask for the cut.</span> <em class="l grad-text">Finish it by hand.</em></h1>
+        <div class="hero-grid">
+            <div class="hero-side reveal" style="--d:500ms">
+                <p class="lede">Speedrun is a Mac video editor with <strong>Claude built in</strong>. Say what you want, and Claude syncs the cameras, reads the transcript and cuts a real multi-track timeline. Then it's yours to trim, grade and hand to Premiere.</p>
+                <div class="cta-row">
+                    <a class="btn dl" href="https://github.com/tlatvys-ac/speedrun-app/releases/latest/download/Speedrun-0.2.0.dmg">
+                        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8.5M4.5 7 8 10.5 11.5 7M3 13.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Download for Mac
+                    </a>
+                    <span class="meta">Free · macOS 26 · Apple silicon</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-media reveal" style="--d:700ms">
+            <div class="frame hero-frame" id="hero-frame">
+                <video class="auto" src="images/hero.mp4" poster="images/hero-poster.jpg" width="1800" height="1048" muted loop playsinline autoplay preload="auto" aria-label="Speedrun's editor as Claude builds a two-camera interview cut from one request: clips land on the timeline, the picture is graded, a lower third is added, and the finished cut plays."></video>
+                <button class="vtoggle" type="button" aria-label="Pause video"><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 2h2.2v10H3.5zM8.3 2h2.2v10H8.3z" fill="currentColor"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg></button>
+            </div>
+            <div class="caption"><span class="rec"><i></i>Real run · one request, start to finish</span><span>2 min 38 s of Claude's work · shown 12× faster</span></div>
+        </div>
+    </div>
+</header>
 
-        <div class="callout" id="unsigned">
-            <h3>If macOS won't open Speedrun</h3>
-            <p>Speedrun isn't notarized by Apple yet, so the first time you open
-            it macOS says it can't check it for malicious software. To open it:</p>
-            <ol>
-                <li>Open Speedrun, and click <strong>Done</strong> in the message.</li>
-                <li>Go to <em>System Settings&nbsp;→ Privacy &amp; Security</em>,
-                    scroll down to the Speedrun message, and click
-                    <strong>Open Anyway</strong>.</li>
-                <li>Confirm with your password. macOS remembers this.</li>
-            </ol>
-            <p>Speedrun also asks once for access to the folders with your
-            footage, and for speech recognition to make transcripts.</p>
+<!-- 01 — Claude -->
+<section class="sec" id="claude" aria-labelledby="claude-h">
+    <div class="wrap">
+        <div class="sec-head">
+            <div>
+                <p class="eyebrow reveal"><span class="flag" style="--c:#EB4D4D"></span><span class="tc">01</span><span class="sep"></span>Claude builds the edit</p>
+                <h2 class="h2" id="claude-h" data-split>One request. <em>Twenty shots.</em></h2>
+            </div>
+            <p class="lede reveal" style="--d:200ms">Claude edits through Speedrun's own tools, so every step lands on the timeline while you watch. Below is the run from the video, condensed: the real prompt, the real tool calls and the real cut. The whole request is <strong>one undo</strong>.</p>
         </div>
 
-        <details>
-            <summary>Advanced and uninstalling</summary>
-            <div class="details-body">
-                <h3>Optional: ffmpeg</h3>
-                <p class="fine">With <a href="https://formulae.brew.sh/formula/ffmpeg">ffmpeg</a>
-                installed, Speedrun can also read MP4 and Sony XAVC timecode,
-                make cleaned-up dialogue files, and convert QuickTime Animation
-                graphics. Using Homebrew:</p>
-                <div class="path">
-                    <code id="ffmpeg">brew install ffmpeg</code>
-                    <button class="copy" type="button" data-copy="ffmpeg">Copy</button>
-                </div>
-                <h3>Where things go</h3>
-                <p class="fine">A project is a <code>Name.speedrun</code> folder
-                holding a readable <code>project.json</code> and the Claude
-                conversation. Files Speedrun makes, like converted graphics,
-                proxies and cleaned dialogue, go in a <code>Name Media</code>
-                folder next to it. Claude connects to Speedrun through a private
-                bridge that only accepts connections from this Mac.</p>
-                <h3>Uninstalling</h3>
-                <p class="fine">Drag Speedrun from Applications to the Trash.
-                To remove its waveform cache and settings too:</p>
-                <div class="path">
-                    <code id="cache">~/Library/Caches/Speedrun</code>
-                    <button class="copy" type="button" data-copy="cache">Copy</button>
-                </div>
-                <div class="path">
-                    <code id="prefs">~/Library/Preferences/com.tlatvys.speedrun.plist</code>
-                    <button class="copy" type="button" data-copy="prefs">Copy</button>
-                </div>
-                <p class="fine">Your projects and footage stay where you saved them.</p>
+        <div class="agent reveal" id="agent" aria-label="Animated replay of the Claude run: the request, each tool call, and the timeline it builds">
+            <div class="chat">
+                <div class="chat-tabs" aria-hidden="true"><span class="on">Claude</span><span>Properties</span><span>Markers</span><span>Transcript</span></div>
+                <div class="chat-body" id="chat" aria-live="off"></div>
+                <div class="chat-input" aria-hidden="true"><span>Ask Claude to edit…</span><span class="undo" id="undo">⌘Z undoes all of it</span></div>
             </div>
-        </details>
-    </section>
+            <div class="edit">
+                <div class="viewer-wrap">
+                    <div class="viewer" id="viewer">
+                        <picture><source srcset="images/viewer-log.avif" type="image/avif"><img data-v="log" src="images/viewer-log.jpg" alt="" loading="lazy" width="1280" height="720"></picture>
+                        <picture><source srcset="images/viewer-lut.avif" type="image/avif"><img data-v="a" src="images/viewer-lut.jpg" alt="" loading="lazy" width="1280" height="720"></picture>
+                        <picture><source srcset="images/viewer-b.avif" type="image/avif"><img data-v="b" src="images/viewer-b.jpg" alt="" loading="lazy" width="1280" height="720"></picture>
+                        <img class="l3" data-v="l3" src="images/lower-third.png" alt="" loading="lazy" width="400" height="300">
+                        <div class="viewer-empty" id="vempty">2 cameras · 1 graphic<br>Nothing on the timeline yet</div>
+                        <div class="viewer-tc" id="vtc">01:00:00:00</div>
+                    </div>
+                </div>
+                <div class="readouts" aria-hidden="true">
+                    <div><small>Shots</small><b id="r-shots">0</b></div>
+                    <div><small>Length</small><b id="r-len">0:00</b></div>
+                    <div><small>Dialogue</small><b id="r-lufs">—</b></div>
+                    <div><small>Grade</small><b id="r-grade">—</b></div>
+                </div>
+                <div class="tl" id="tl" aria-hidden="true">
+                    <div class="tl-ruler"><div></div><div class="lane" id="ruler"></div></div>
+                    <div class="tl-row v2"><div class="hd">V2</div><div class="lane" id="lane-v2"></div></div>
+                    <div class="tl-row v1"><div class="hd">V1</div><div class="lane" id="lane-v1"></div></div>
+                    <div class="tl-row a1"><div class="hd">A1</div><div class="lane" id="lane-a1"></div></div>
+                    <div class="playhead" id="ph"></div>
+                </div>
+            </div>
+        </div>
+        <div class="agent-foot reveal">
+            <span>Condensed from 60 tool calls · Scott interview, 2 cameras, 15 min of footage</span>
+            <button class="replay" id="replay" type="button"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7a4.5 4.5 0 1 0 1.4-3.3M2.5 2v2.6h2.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Replay</button>
+        </div>
+        <noscript><p class="lede" style="margin-top:24px">Claude synced the two cameras, transcribed 2,240 words, assembled 20 shots alternating wide and medium, checked every join, added the lower third, applied both LUTs and set dialogue to −16.7 LUFS.</p></noscript>
 
-    <section>
-        <h2 class="divider">Requirements</h2>
-        <p class="fine">macOS 26 on a Mac with Apple silicon, and Claude Code
-        installed and signed in. Transcription runs on your Mac. Claude's work
-        counts toward your Claude plan or API usage like any other Claude Code
-        session.</p>
-    </section>
-    </main>
+        <div class="stats" id="stats">
+            <div class="stat reveal"><b data-count="2">2</b><span>cameras synced by their sound, with a drift check</span></div>
+            <div class="stat reveal" style="--d:100ms"><b data-count="2240" data-sep>2,240</b><span>words transcribed on your Mac, with word timings</span></div>
+            <div class="stat reveal" style="--d:200ms"><b data-count="20">20</b><span>shots checked word by word on both sides of every cut</span></div>
+            <div class="stat reveal" style="--d:300ms"><b data-count="1">1</b><span>undo for the whole request, if you'd rather not</span></div>
+        </div>
+    </div>
+</section>
 
-    <footer>
-        <p>Speedrun <span id="version">v0.2.0</span><span class="sep">·</span><wbr><a href="https://github.com/tlatvys-ac/speedrun-app/releases">Release notes</a><span class="sep">·</span><wbr>Made&nbsp;by&nbsp;Thomas&nbsp;Latvys</p>
-        <p>More tools:
-            <a href="https://tlatvys-ac.github.io/fluidlab-app/">FluidLab</a><span class="sep">·</span><wbr><a href="https://tlatvys-ac.github.io/refractlab-app/">RefractLab</a><span class="sep">·</span><wbr><a href="https://tlatvys-ac.github.io/anchor-buddy-app/">Anchor&nbsp;Buddy</a><span class="sep">·</span><wbr><a href="https://tlatvys-ac.github.io/transporter-app/">Transporter</a><span class="sep">·</span><wbr><a href="https://tlatvys-ac.github.io/aedoom-app/">AEDoom</a><span class="sep">·</span><wbr><a href="https://tlatvys-ac.github.io/motionref-app/">MotionRef</a><span class="sep">·</span><wbr><a href="https://tlatvys-ac.github.io/meld-app/">Meld</a><span class="sep">·</span><wbr><a href="https://tlatvys-ac.github.io/gradientlab-app/">GradientLab</a><span class="sep">·</span><wbr><a href="https://tlatvys-ac.github.io/cursor-time-app/">Cursor&nbsp;Time</a>
-        </p>
-    </footer>
-</div>
+<!-- 02 — Markers -->
+<section class="sec" id="notes" aria-labelledby="notes-h">
+    <div class="wrap">
+        <div class="sec-head">
+            <div>
+                <p class="eyebrow reveal"><span class="flag" style="--c:#FA9433"></span><span class="tc">02</span><span class="sep"></span>Markers</p>
+                <h2 class="h2" id="notes-h" data-split>Leave a note. <em>Claude takes it from there.</em></h2>
+            </div>
+            <p class="lede reveal" style="--d:200ms">Press <kbd>M</kbd> where something's off and say what you want. Claude works through your feedback markers, makes each fix, and tags the marker Done.</p>
+        </div>
+        <div class="split">
+            <div class="reveal"><div class="frame">
+                <video class="auto" src="images/markers.mp4" poster="images/markers-poster.jpg" width="1600" height="936" muted loop playsinline autoplay preload="metadata" aria-label="A red Feedback marker reading 'This one drags' is added on the timeline. Claude is asked to handle it: it trims the hesitation, switches angle to avoid a jump cut, and the marker turns green with the Done tag."></video>
+                <button class="vtoggle" type="button" aria-label="Pause video"><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 2h2.2v10H3.5zM8.3 2h2.2v10H8.3z" fill="currentColor"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg></button>
+            </div>
+            <div class="caption"><span class="rec"><i></i>Real run</span><span>Claude's part shown 6× faster</span></div></div>
+            <ul class="list reveal" style="--d:150ms">
+                <li><b><span class="tag" style="background:rgba(235,77,77,.18);color:#FF8A8A">Feedback</span>Sequence markers</b>Revision notes at a frame on the timeline. Claude reads the note, fixes it and tags it Done.</li>
+                <li><b><span class="tag" style="background:rgba(76,204,102,.16);color:#7EE29A">Selects</span>Clip markers</b>Great moments in the footage itself. They follow the clip into any sequence, and Claude builds first cuts from them.</li>
+                <li><b><span class="tag" style="background:rgba(77,140,250,.18);color:#8DB5FF">Premiere</span>They travel</b>Markers go out in Premiere XML with their notes and tags, and into EDLs as locators.</li>
+            </ul>
+        </div>
+    </div>
+</section>
 
-<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Screenshot preview" hidden>
-    <img id="lightbox-img" src="" alt="">
-    <button class="lightbox-close" id="lightbox-close" type="button" aria-label="Close preview">×</button>
-</div>
+<!-- 03 — By hand -->
+<section class="sec" id="hands" aria-labelledby="hands-h">
+    <div class="wrap">
+        <div class="sec-head">
+            <div>
+                <p class="eyebrow reveal"><span class="flag" style="--c:#FAD640"></span><span class="tc">03</span><span class="sep"></span>By hand</p>
+                <h2 class="h2" id="hands-h" data-split>The timeline <em>is still yours.</em></h2>
+            </div>
+            <p class="lede reveal" style="--d:200ms">What Claude makes is ordinary clips on ordinary tracks. Pick up any of it and keep going, with the tools editors already know.</p>
+        </div>
+        <div class="tabs reveal" id="tabs">
+            <div class="tablist" role="tablist" aria-label="Editing tools">
+                <button class="tab" role="tab" id="tab-trim" aria-controls="p-trim" aria-selected="true" tabindex="0">
+                    <h3>Trim mode <small>U</small></h3>
+                    <p><span>Avid-style trimming. A and B monitors, yellow rollers, roll the cut or ripple either side, and trim with <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> while it plays.</span></p>
+                    <span class="bar"></span>
+                </button>
+                <button class="tab" role="tab" id="tab-box" aria-controls="p-box" aria-selected="false" tabindex="-1">
+                    <h3>Viewer box <small>Double-click</small></h3>
+                    <p><span>Move, scale and rotate a clip right on the picture. The Properties panel follows along, each drag is one undo, and animated properties get a keyframe.</span></p>
+                    <span class="bar"></span>
+                </button>
+                <button class="tab" role="tab" id="tab-src" aria-controls="p-src" aria-selected="false" tabindex="-1">
+                    <h3>Source monitor <small>I · O · ,</small></h3>
+                    <p><span>Mark a range in the camera file, then insert it at the playhead with <kbd>,</kbd> or overwrite with <kbd>.</kbd>. <kbd>F</kbd> opens the clip under the playhead at the same frame.</span></p>
+                    <span class="bar"></span>
+                </button>
+            </div>
+            <div class="stage">
+                <p class="desc-m" id="desc-m"></p>
+                <div class="frame" style="--ar: 16 / 11">
+                    <div class="panel on" role="tabpanel" id="p-trim" aria-labelledby="tab-trim">
+                        <video src="images/trim.mp4" poster="images/trim-poster.jpg" width="940" height="690" muted playsinline preload="metadata" aria-label="Trim mode: A and B monitors above the timeline with yellow rollers on the cut. The cut rolls six frames, then the B side and the A side are trimmed while playing."></video>
+                    </div>
+                    <div class="panel" role="tabpanel" id="p-box" aria-labelledby="tab-box" hidden>
+                        <video src="images/transform.mp4" poster="images/transform-poster.jpg" width="1280" height="674" muted playsinline preload="none" aria-label="The lower third gets a bounding box in the viewer, then is moved, scaled and rotated while the Properties panel updates."></video>
+                    </div>
+                    <div class="panel" role="tabpanel" id="p-src" aria-labelledby="tab-src" hidden>
+                        <video src="images/source.mp4" poster="images/source-poster.jpg" width="1080" height="896" muted playsinline preload="none" aria-label="A range of the B camera is marked in the source monitor and inserted at the playhead; later shots move right."></video>
+                    </div>
+                    <button class="vtoggle" id="tabs-toggle" type="button" aria-label="Pause video"><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 2h2.2v10H3.5zM8.3 2h2.2v10H8.3z" fill="currentColor"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 04 — Color -->
+<section class="sec" id="color" aria-labelledby="color-h">
+    <div class="wrap">
+        <div class="sec-head">
+            <div>
+                <p class="eyebrow reveal"><span class="flag" style="--c:#4D8CFA"></span><span class="tc">04</span><span class="sep"></span>Color</p>
+                <h2 class="h2" id="color-h" data-split>Log in. <em>Graded out.</em></h2>
+            </div>
+            <p class="lede reveal" style="--d:200ms">Give each camera its <code>.cube</code> LUT and every clip from it is graded, in the viewer, the source monitor and the export. Then fine-tune exposure, temperature, tint, contrast and saturation. In the run above, Claude found both LUTs in the folder and matched the angles.</p>
+        </div>
+        <div class="frame compare reveal" id="compare">
+            <picture><source srcset="images/grade-lut.avif" type="image/avif"><img src="images/grade-lut.jpg" alt="The medium camera angle of Scott with its LUT applied: natural contrast and color." width="1920" height="1080" loading="lazy"></picture>
+            <picture class="before"><source srcset="images/grade-log.avif" type="image/avif"><img src="images/grade-log.jpg" alt="The same frame as shot in S-Log3: flat and washed out." width="1920" height="1080" loading="lazy"></picture>
+            <span class="chip tl">S-Log3 · as shot</span>
+            <span class="chip tr">B cam LUT</span>
+            <input type="range" min="0" max="100" value="50" step="0.5" id="cmp" aria-label="Compare the log footage with the graded footage">
+            <div class="handle"><div class="knob"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 5.5 3 10l4.5 4.5M12.5 5.5 17 10l-4.5 4.5" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        </div>
+        <div class="hint"><span>Drag to compare</span><span>Scott interview · B cam, Sony S-Log3 → Rec. 709</span></div>
+    </div>
+</section>
+
+<!-- 05 — Transcript -->
+<section class="sec" id="transcript" aria-labelledby="ts-h">
+    <div class="wrap">
+        <div class="split" style="align-items:end">
+            <div class="ts reveal" id="ts" aria-label="Animated transcript panel: words light up as they're spoken, then a sentence is selected and added to the timeline">
+                <div class="ts-head" aria-hidden="true"><span>Claude</span><span>Properties</span><span>Markers</span><span class="on">Transcript</span></div>
+                <div class="ts-search" aria-hidden="true"><svg viewBox="0 0 14 14"><circle cx="6" cy="6" r="4.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m9.2 9.2 3.3 3.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Search what was said</div>
+                <div class="ts-body" id="ts-body"></div>
+                <div class="ctx" id="ctx" aria-hidden="true"><div>Go to Sentence</div><div class="hi">Add to Timeline</div><hr><div>Copy Text</div></div>
+            </div>
+            <div>
+                <p class="eyebrow reveal"><span class="flag" style="--c:#4DD1E6"></span><span class="tc">05</span><span class="sep"></span>Transcript</p>
+                <h2 class="h2" id="ts-h" data-split style="margin-bottom:32px">Cut from <em>the words.</em></h2>
+                <p class="lede reveal" style="--d:200ms">Speedrun transcribes on your Mac, down to the word. Claude searches the transcript to find takes and snaps each cut to a pause. You can click a sentence to jump there, right-click to add it to the timeline, or export captions as SRT.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 06 — Export -->
+<section class="sec" id="export" aria-labelledby="export-h">
+    <div class="wrap">
+        <div class="sec-head">
+            <div>
+                <p class="eyebrow reveal"><span class="flag" style="--c:#A873F2"></span><span class="tc">06</span><span class="sep"></span>Export</p>
+                <h2 class="h2" id="export-h" data-split>Finish it <em>anywhere.</em></h2>
+            </div>
+            <p class="lede reveal" style="--d:200ms">Export the finished movie, or hand the cut to Premiere Pro with its tracks, levels, fades, dissolves, keyframes and markers intact. Every export starts at 01:00:00:00.</p>
+        </div>
+        <div class="cards reveal">
+            <div class="card"><span class="file" style="--fc:#FF7D5E"><i></i>Town Hall.mov</span><h3>Movie <small>⌘M</small></h3><ul><li>H.264, HEVC or ProRes</li><li>Sequence size, 1080p or 720p</li><li>Loudness to −16 LUFS, with a limiter</li></ul></div>
+            <div class="card"><span class="file" style="--fc:#A873F2"><i></i>Town Hall.xml</span><h3>Premiere XML</h3><ul><li>Every track, level, fade and dissolve</li><li>Position, scale and keyframes</li><li>Markers with notes and tags</li></ul></div>
+            <div class="card"><span class="file" style="--fc:#4D8CFA"><i></i>Town Hall V1.edl</span><h3>EDL</h3><ul><li>CMX 3600</li><li>Camera source timecode</li><li>One per video track, with locators</li></ul></div>
+            <div class="card"><span class="file" style="--fc:#4CCC66"><i></i>Town Hall.srt</span><h3>Captions</h3><ul><li>SRT from the transcripts</li><li>In timeline time</li><li>Only what's in the cut</li></ul></div>
+        </div>
+
+        <div class="more">
+            <div class="reveal"><b>Multicam sync</b><span>Waveform sync of any number of cameras into angles, with a drift check.</span></div>
+            <div class="reveal" style="--d:60ms"><b>The cleanest mic</b><span>Every channel is analyzed for clipping and noise, so Claude picks the clean one.</span></div>
+            <div class="reveal" style="--d:120ms"><b>Dialogue cleanup</b><span>Hum removal, high-pass and denoise, as new files next to the project.</span></div>
+            <div class="reveal"><b>Loudness</b><span>Per-clip LUFS, gain rides, and a peak meter with clip lights.</span></div>
+            <div class="reveal" style="--d:60ms"><b>Keyframes</b><span>Position, scale, rotation, opacity and level, carried to Premiere.</span></div>
+            <div class="reveal" style="--d:120ms"><b>Dissolves and fades</b><span>Right-click a cut for a cross dissolve or crossfade, and drag to change its length.</span></div>
+            <div class="reveal"><b>Proxies</b><span>Heavy 4K gets a 1080p proxy on import. Export always uses the originals.</span></div>
+            <div class="reveal" style="--d:60ms"><b>Bins and sequences</b><span>Nested bins and any number of sequences, so alternate cuts live side by side.</span></div>
+            <div class="reveal" style="--d:120ms"><b>Snapping and scrubbing</b><span>Snap with <kbd>S</kbd>, hear the audio as you drag with <kbd>⇧S</kbd>, and step frames with sound.</span></div>
+        </div>
+    </div>
+</section>
+
+<!-- Statement -->
+<section class="sec" aria-label="Privacy">
+    <div class="wrap">
+        <p class="eyebrow reveal"><span class="flag" style="--c:#FA80BF"></span><span class="tc">07</span><span class="sep"></span>On your Mac</p>
+        <p class="statement" id="statement" data-scrub>Your footage stays where it is. Speedrun edits it in place, never copies or uploads it, and <em>transcribes on your Mac.</em></p>
+        <p class="statement-note reveal">Claude works from the transcript and the timeline, and looks at still frames it renders to check its work. It runs through your own Claude Code sign-in, and connects to Speedrun through a private bridge that only accepts connections from this Mac.</p>
+    </div>
+</section>
+
+<!-- 08 — Get started -->
+<section class="sec" id="start" aria-labelledby="start-h">
+    <div class="wrap">
+        <div class="sec-head">
+            <div>
+                <p class="eyebrow reveal"><span class="flag" style="--c:#EBEBEB"></span><span class="tc">08</span><span class="sep"></span>Get started</p>
+                <h2 class="h2" id="start-h" data-split>Four steps <em>to a first cut.</em></h2>
+            </div>
+            <p class="lede reveal" style="--d:200ms">Speedrun is free. Claude's work counts toward your Claude plan or API usage, like any other Claude Code session.</p>
+        </div>
+        <ol class="steps reveal">
+            <li><b>Get Claude Code</b>Speedrun runs your own <a href="https://docs.anthropic.com/en/docs/claude-code/setup">Claude Code</a> and its sign-in, so company setups work too. Run <code>claude</code> in Terminal once to sign in.</li>
+            <li><b>Install Speedrun</b>Open <code>Speedrun-<span class="v">0.2.0</span>.dmg</code> and drag Speedrun into Applications.</li>
+            <li><b>Open it once</b>The first launch needs a stop in Privacy &amp; Security, shown below. After that it opens like any app.</li>
+            <li><b>Ask for a cut</b>Make a project, drag in your footage, and tell the Claude tab what you want: "Sync the cameras and cut the intro from my notes."</li>
+        </ol>
+        <div class="callout reveal" id="unsigned">
+            <div>
+                <h3>If macOS won't open Speedrun</h3>
+                <ol>
+                    <li>Speedrun isn't notarized by Apple yet, so macOS says it can't check it. Click <strong>Done</strong>.</li>
+                    <li>Open <em>System Settings → Privacy &amp; Security</em>, scroll to the Speedrun message and click <strong>Open Anyway</strong>.</li>
+                    <li>Confirm with your password. macOS remembers.</li>
+                </ol>
+                <p>Speedrun also asks once for access to the folders with your footage, and for speech recognition to make transcripts.</p>
+            </div>
+            <div class="mac-dialog" aria-hidden="true">
+                <small>Privacy &amp; Security · Security</small>
+                <div class="row"><span>"Speedrun" was blocked to protect your Mac.</span><span class="oa">Open Anyway</span></div>
+            </div>
+        </div>
+
+        <div class="faq">
+            <div>
+                <h3 class="h3 reveal">Questions</h3>
+            </div>
+            <div class="reveal">
+                <details>
+                    <summary>What do I need?</summary>
+                    <div class="ans"><p>A Mac with Apple silicon running macOS 26, and Claude Code installed and signed in. Transcription runs on your Mac.</p></div>
+                </details>
+                <details>
+                    <summary>Does Claude see my footage?</summary>
+                    <div class="ans"><p>Claude reads the transcript and the timeline, and looks at still frames it renders to check the grade, framing and graphics. Your media files are never copied or uploaded.</p></div>
+                </details>
+                <details>
+                    <summary>Do I need ffmpeg?</summary>
+                    <div class="ans"><p>No, but with <a href="https://formulae.brew.sh/formula/ffmpeg">ffmpeg</a> installed, Speedrun can also read MP4 and Sony XAVC timecode, make cleaned-up dialogue files, and convert QuickTime Animation graphics. With Homebrew:</p>
+                    <div class="path"><code id="ffmpeg">brew install ffmpeg</code><button class="copy" type="button" data-copy="ffmpeg">Copy</button></div></div>
+                </details>
+                <details>
+                    <summary>Where are my projects saved?</summary>
+                    <div class="ans"><p>A project is a <code>Name.speedrun</code> folder with a readable <code>project.json</code> and the Claude conversation. Files Speedrun makes, like proxies, converted graphics and cleaned dialogue, go in a <code>Name Media</code> folder next to it.</p></div>
+                </details>
+                <details>
+                    <summary>How do I uninstall it?</summary>
+                    <div class="ans"><p>Drag Speedrun from Applications to the Trash. To remove its waveform cache and settings too, delete these:</p>
+                    <div class="path"><code id="cache">~/Library/Caches/Speedrun</code><button class="copy" type="button" data-copy="cache">Copy</button></div>
+                    <div class="path"><code id="prefs">~/Library/Preferences/com.tlatvys.speedrun.plist</code><button class="copy" type="button" data-copy="prefs">Copy</button></div>
+                    <p>Your projects and footage stay where you saved them.</p></div>
+                </details>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Closing -->
+<section class="closing" id="closing" aria-labelledby="close-h">
+    <picture><source srcset="images/closing.avif" type="image/avif"><img src="images/closing.jpg" alt="" width="2400" height="1350" loading="lazy"></picture>
+    <div class="wrap" style="width:100%">
+        <h2 class="display" id="close-h" data-split>Make <em>the cut.</em></h2>
+        <p class="lede reveal" style="--d:300ms">Free for macOS 26 on Apple silicon. Bring your footage and a sentence about what you want.</p>
+        <div class="cta-row reveal" style="--d:400ms">
+            <a class="btn dl" href="https://github.com/tlatvys-ac/speedrun-app/releases/latest/download/Speedrun-0.2.0.dmg">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8.5M4.5 7 8 10.5 11.5 7M3 13.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Download Speedrun
+            </a>
+            <span class="meta">Version <span class="v">0.2.0</span> · <a href="https://github.com/tlatvys-ac/speedrun-app/releases">Release notes</a></span>
+        </div>
+    </div>
+</section>
+</main>
+
+<footer>
+    <div class="wrap foot">
+        <div>
+            <a class="brand" href="#top"><img src="images/logo.png" alt="" width="28" height="28"><span>Speedrun</span></a>
+            <p>Made by Thomas Latvys<br><span id="version">v0.2.0</span> · Footage: Scott interview, with permission</p>
+        </div>
+        <div>
+            <h4>Speedrun</h4>
+            <ul>
+                <li><a class="dl" href="https://github.com/tlatvys-ac/speedrun-app/releases/latest/download/Speedrun-0.2.0.dmg">Download</a></li>
+                <li><a href="https://github.com/tlatvys-ac/speedrun-app/releases">Release notes</a></li>
+                <li><a href="#start">Get started</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>More tools</h4>
+            <ul class="tools">
+                <li><a href="https://tlatvys-ac.github.io/fluidlab-app/">FluidLab</a></li>
+                <li><a href="https://tlatvys-ac.github.io/refractlab-app/">RefractLab</a></li>
+                <li><a href="https://tlatvys-ac.github.io/anchor-buddy-app/">Anchor Buddy</a></li>
+                <li><a href="https://tlatvys-ac.github.io/transporter-app/">Transporter</a></li>
+                <li><a href="https://tlatvys-ac.github.io/aedoom-app/">AEDoom</a></li>
+                <li><a href="https://tlatvys-ac.github.io/motionref-app/">MotionRef</a></li>
+                <li><a href="https://tlatvys-ac.github.io/meld-app/">Meld</a></li>
+                <li><a href="https://tlatvys-ac.github.io/gradientlab-app/">GradientLab</a></li>
+                <li><a href="https://tlatvys-ac.github.io/cursor-time-app/">Cursor Time</a></li>
+            </ul>
+        </div>
+    </div>
+</footer>
 
 <script>
-// Click (or Enter/Space on) a screenshot to preview it at full size;
-// click anywhere, press Escape, or use the close button to close. Focus
-// moves into the preview and back to the screenshot that opened it.
 (() => {
-    const box = document.getElementById("lightbox");
-    const big = document.getElementById("lightbox-img");
-    const closeBtn = document.getElementById("lightbox-close");
-    let opener = null;
-    const open = (btn) => {
-        const img = btn.querySelector("img");
-        big.src = img.currentSrc || img.src;
-        big.alt = img.alt;
-        opener = btn;
-        box.hidden = false;
-        document.body.style.overflow = "hidden";
-        closeBtn.focus();
-    };
-    const close = () => {
-        if (box.hidden) return;
-        box.hidden = true;
-        document.body.style.overflow = "";
-        if (opener) opener.focus();
-    };
-    document.querySelectorAll(".shot").forEach((btn) => btn.addEventListener("click", () => open(btn)));
-    box.addEventListener("click", close);
-    document.addEventListener("keydown", (e) => {
-        if (box.hidden) return;
-        if (e.key === "Escape") close();
-        if (e.key === "Tab") { e.preventDefault(); closeBtn.focus(); }
-    });
-})();
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const FPS = 24;     // 23.976 non-drop counts like 24
+const tc = (f, base = 86400) => {
+    f = Math.max(0, Math.round(f)) + base;
+    const ff = f % FPS, s = Math.floor(f / FPS), p = (n) => String(n).padStart(2, "0");
+    return `${p(Math.floor(s / 3600))}:${p(Math.floor(s / 60) % 60)}:${p(s % 60)}:${p(ff)}`;
+};
+const mmss = (f) => { const s = Math.round(f / (24000 / 1001)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
 
-// Copy buttons.
-document.querySelectorAll(".copy").forEach((btn) => {
-    btn.addEventListener("click", () => {
-        const text = document.getElementById(btn.dataset.copy).textContent;
-        const done = () => {
-            btn.textContent = "Copied";
-            setTimeout(() => { btn.textContent = "Copy"; }, 1500);
-        };
-        if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, () => {});
+// ---------- Split headings into words ----------
+const split = (el) => {
+    let i = 0;
+    const walk = (node) => {
+        [...node.childNodes].forEach((n) => {
+            if (n.nodeType === 3) {
+                const frag = document.createDocumentFragment();
+                n.textContent.split(/(\s+)/).forEach((part) => {
+                    if (!part) return;
+                    if (/^\s+$/.test(part)) { frag.append(" "); return; }
+                    const w = document.createElement("span"); w.className = "w";
+                    const inner = document.createElement("span"); inner.textContent = part; inner.style.setProperty("--i", i++);
+                    w.append(inner); frag.append(w);
+                });
+                n.replaceWith(frag);
+            } else if (n.nodeType === 1) walk(n);
+        });
+    };
+    walk(el);
+};
+if (!reduce) $$("[data-split]").forEach(split);
+
+// ---------- Reveal on scroll ----------
+const io = new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+}), { threshold: 0.15, rootMargin: "0px 0px -6% 0px" });
+$$("[data-split], .reveal").forEach((el) => reduce ? el.classList.add("in") : io.observe(el));
+
+// ---------- Scroll-linked: nav, timecode, hero scale, statement, closing ----------
+const nav = $("#nav"), tcEl = $("#tc"), prog = $("#progress"), heroFrame = $("#hero-frame");
+const closingImg = $("#closing img"), closing = $("#closing");
+const st = $("#statement");
+let sw = [];
+if (st && !reduce) {
+    const walk = (node) => [...node.childNodes].forEach((n) => {
+        if (n.nodeType === 3) {
+            const frag = document.createDocumentFragment();
+            n.textContent.split(/(\s+)/).forEach((p) => {
+                if (!p) return;
+                if (/^\s+$/.test(p)) { frag.append(" "); return; }
+                const s = document.createElement("span"); s.className = "sw"; s.textContent = p; frag.append(s);
+            });
+            n.replaceWith(frag);
+        } else walk(n);
     });
+    walk(st); sw = $$(".sw", st);
+}
+const CUT = 2789;   // frames in the Town Hall cut
+let ticking = false;
+const onScroll = () => {
+    ticking = false;
+    const y = scrollY, vh = innerHeight, max = document.documentElement.scrollHeight - vh;
+    const p = max > 0 ? Math.min(1, y / max) : 0;
+    nav.classList.toggle("scrolled", y > 8);
+    prog.style.setProperty("--p", p.toFixed(4));
+    tcEl.textContent = tc(p * (CUT - 1));
+    if (reduce) return;
+    if (heroFrame && innerWidth > 900) {
+        const r = heroFrame.parentElement.getBoundingClientRect();
+        const t = Math.min(1, Math.max(0, (vh - r.top) / (vh * 0.9)));
+        heroFrame.style.setProperty("--s", (0.9 + 0.1 * t).toFixed(4));
+    } else if (heroFrame) heroFrame.style.setProperty("--s", 1);
+    if (sw.length) {
+        const r = st.getBoundingClientRect();
+        const t = (vh * 0.82 - r.top) / (r.height + vh * 0.25);
+        const n = Math.round(Math.min(1, Math.max(0, t)) * sw.length);
+        sw.forEach((s, i) => s.classList.toggle("lit", i < n));
+    }
+    if (closing) {
+        const r = closing.getBoundingClientRect();
+        const t = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
+        closingImg.style.setProperty("--z", (1.12 - 0.1 * t).toFixed(4));
+    }
+};
+addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
+addEventListener("resize", onScroll);
+onScroll();
+
+// ---------- Videos with a pause button, playing only on screen ----------
+const vio = new IntersectionObserver((es) => es.forEach((e) => {
+    const v = e.target;
+    if (e.isIntersecting && !v.userPaused) v.play().catch(() => {});
+    else if (!e.isIntersecting && !v.paused) v.pause();
+}), { threshold: 0.3 });
+$$("video.auto").forEach((v) => {
+    const btn = v.parentElement.querySelector(".vtoggle");
+    v.userPaused = reduce;
+    if (reduce) { v.removeAttribute("autoplay"); v.pause(); }
+    const sync = () => { btn.classList.toggle("paused", v.paused); btn.setAttribute("aria-label", v.paused ? "Play video" : "Pause video"); };
+    btn.addEventListener("click", () => { if (v.paused) { v.userPaused = false; v.play(); } else { v.userPaused = true; v.pause(); } });
+    v.addEventListener("play", sync); v.addEventListener("pause", sync); sync();
+    vio.observe(v);
 });
 
-// Videos: each has a pause/play button. They play only while on screen,
-// and not at all (until you press play) with reduced motion.
+// ---------- Count-up stats ----------
+const cio = new IntersectionObserver((es) => es.forEach((e) => {
+    if (!e.isIntersecting) return;
+    cio.unobserve(e.target);
+    const el = e.target, end = +el.dataset.count, t0 = performance.now(), dur = 1400 + Math.min(800, end);
+    const fmt = (n) => el.hasAttribute("data-sep") ? n.toLocaleString("en-US") : String(n);
+    const step = (now) => {
+        const k = Math.min(1, (now - t0) / dur), e3 = 1 - Math.pow(1 - k, 3);
+        el.textContent = fmt(Math.round(end * e3));
+        if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+}), { threshold: 0.6 });
+if (!reduce) $$("[data-count]").forEach((el) => { el.textContent = "0"; cio.observe(el); });
+
+// ---------- The agent replay ----------
 (() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    document.querySelectorAll("video.autoplay").forEach((video) => {
-        const btn = video.parentElement.querySelector(".video-toggle");
-        let userPaused = reduce;
-        const sync = () => {
-            btn.classList.toggle("paused", video.paused);
-            btn.setAttribute("aria-label", video.paused ? "Play video" : "Pause video");
-        };
-        if (reduce) { video.removeAttribute("autoplay"); video.pause(); }
-        btn.addEventListener("click", () => {
-            if (video.paused) { userPaused = false; video.play(); }
-            else { userPaused = true; video.pause(); }
-        });
-        video.addEventListener("play", sync);
-        video.addEventListener("pause", sync);
-        sync();
-        if ("IntersectionObserver" in window) {
-            new IntersectionObserver((entries) => {
-                entries.forEach((e) => {
-                    if (e.isIntersecting && !userPaused) video.play().catch(() => {});
-                    else if (!e.isIntersecting && !video.paused) video.pause();
-                });
-            }, { threshold: 0.35 }).observe(video);
-        } else if (!reduce) {
-            video.play().catch(() => {});
-        }
+    const root = $("#agent"); if (!root) return;
+    // The real Town Hall cut: [start, duration] in frames on V1 (A, B, A, …), the lower third on V2.
+    const V1 = [[0,104],[104,120],[224,127],[351,91],[442,139],[581,193],[774,165],[939,97],[1036,129],[1165,117],[1282,171],[1453,93],[1546,150],[1696,83],[1779,163],[1942,141],[2083,160],[2243,193],[2436,180],[2616,173]];
+    const V2 = [[7,192],[199,24]];
+    const pct = (f) => (f / CUT * 100) + "%";
+    const ruler = $("#ruler"), lv1 = $("#lane-v1"), lv2 = $("#lane-v2"), la1 = $("#lane-a1");
+    [0, 30, 60, 90].forEach((s) => {
+        const sp = document.createElement("span"); sp.style.left = pct(s * 24000 / 1001); sp.textContent = tc(s * 24, 86400).slice(0, 8); ruler.append(sp);
     });
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const wave = (n) => {
+        let d = ""; for (let i = 0; i < n; i++) { const h = 0.25 + rnd() * 0.75 * (0.5 + 0.5 * Math.sin(i * 0.9 + rnd() * 3)); const y = 50 - h * 46; d += `M${i * 4 + 1} ${y.toFixed(1)}V${(100 - y).toFixed(1)}`; }
+        return `<svg viewBox="0 0 ${n * 4} 100" preserveAspectRatio="none"><path d="${d}" stroke="#8CD9A6" stroke-width="2" opacity=".8"/></svg>`;
+    };
+    const mk = (lane, [s, d], cls, label) => {
+        const c = document.createElement("div"); c.className = "clip " + cls;
+        c.style.left = pct(s); c.style.width = `calc(${pct(d)} - 1px)`;
+        if (label) c.textContent = label;
+        lane.append(c); return c;
+    };
+    const v1 = V1.map((c, i) => mk(lv1, c, i % 2 ? "b" : "", i % 2 ? "B" : "A"));
+    const a1 = V1.map((c) => { const el = mk(la1, c, "au"); el.innerHTML = wave(Math.max(6, Math.round(c[1] / 6))) + '<span class="gain"></span>'; return el; });
+    const v2 = V2.map((c) => mk(lv2, c, "g", "L3"));
+    const chat = $("#chat"), ph = $("#ph"), tl = $("#tl"), undo = $("#undo");
+    const vimg = (k) => $(`#viewer [data-v="${k}"]`);
+    const show = (k, on) => vimg(k).classList.toggle("on", on);
+    const ro = { shots: $("#r-shots"), len: $("#r-len"), lufs: $("#r-lufs"), grade: $("#r-grade") };
+    const vtc = $("#vtc"), vempty = $("#vempty");
+    const PROMPT = "Build the Town Hall cut of this Scott interview. Sync the two cameras (A cam is the wide, B cam the medium) and use the cleanest mic channel. Open on the wide with his intro, then the part about Active Intelligence flagging churn and the weekly churn report, and finish with “I'm so upset with you” through “it's a game changer”. Every cut switches angle, shots around 8 s max. Grade with the LUTs, put the lower third over his intro, and set dialogue to −16 LUFS.";
+    let timers = [], raf = 0, run = 0;
+    const later = (ms, fn) => timers.push(setTimeout(fn, ms));
+    const scroll = () => chat.scrollTo({ top: chat.scrollHeight, behavior: reduce ? "auto" : "smooth" });
+    const add = (html, cls) => { const d = document.createElement("div"); d.className = cls; d.innerHTML = html; chat.append(d); scroll(); return d; };
+    const tool = (name, text, ms = 450) => { const d = add(`<span class="st"></span><code>${name}</code><span>${text}</span>`, "tool"); later(ms, () => d.classList.add("ok")); return d; };
+    const tween = (from, to, ms, fn, done) => {
+        const t0 = performance.now(), my = run;
+        const f = (now) => { if (my !== run) return; const k = Math.min(1, (now - t0) / ms), e = 1 - Math.pow(1 - k, 3); fn(from + (to - from) * e); if (k < 1) requestAnimationFrame(f); else if (done) done(); };
+        requestAnimationFrame(f);
+    };
+    const reset = () => {
+        run++; timers.forEach(clearTimeout); timers = []; cancelAnimationFrame(raf);
+        chat.innerHTML = ""; undo.classList.remove("show");
+        [...v1, ...a1, ...v2].forEach((c) => { c.classList.remove("in", "hit"); c.style.removeProperty("--amp"); c.style.removeProperty("--gy"); c.style.transitionDelay = ""; });
+        ["log", "a", "b", "l3"].forEach((k) => show(k, false)); vempty.style.opacity = 1;
+        ro.shots.textContent = "0"; ro.len.textContent = "0:00"; ro.lufs.textContent = "—"; ro.grade.textContent = "—";
+        Object.values(ro).forEach((b) => b.classList.remove("hot"));
+        ph.classList.remove("on"); ph.style.setProperty("--x", "0px"); vtc.textContent = tc(0); $("#viewer").classList.remove("playing");
+    };
+    const frameView = (f, graded) => {
+        const i = V1.findIndex(([s, d]) => f >= s && f < s + d);
+        const cam = i % 2 ? "b" : "a";
+        show("a", graded && cam === "a"); show("b", graded && cam === "b"); show("log", !graded);
+        show("l3", V2.some(([s, d]) => f >= s && f < s + d));
+        vtc.textContent = tc(f);
+    };
+    const flash = (b) => { b.classList.add("hot"); later(900, () => b.classList.remove("hot")); };
+    const finalState = () => {
+        reset();
+        v1.concat(a1, v2).forEach((c) => c.classList.add("in"));
+        a1.forEach((c) => { c.style.setProperty("--amp", 0.85); c.style.setProperty("--gy", "22%"); });
+        vempty.style.opacity = 0; frameView(30, true);
+        ro.shots.textContent = "20"; ro.len.textContent = "1:56"; ro.lufs.innerHTML = "−16.7"; ro.grade.textContent = "2 LUTs";
+        add(PROMPT, "msg user");
+        add("The Town Hall cut is built: <b>1:56, 20 shots</b>, alternating wide and medium. Dialogue is at <b>−16.7 LUFS</b>, and the lower third sits lower-right, clear of him on both angles.", "msg ai");
+        undo.classList.add("show"); ph.classList.add("on");
+    };
+    const play = () => {
+        reset();
+        const my = run;
+        // Type the request.
+        const u = add('<span class="tx"></span><span class="caret"></span>', "msg user"), tx = u.querySelector(".tx");
+        const t0 = performance.now(), cps = 260;
+        const type = (now) => {
+            if (my !== run) return;
+            const n = Math.min(PROMPT.length, Math.floor((now - t0) / 1000 * cps));
+            tx.textContent = PROMPT.slice(0, n);
+            if (n % 20 === 0) chat.scrollTop = chat.scrollHeight;
+            if (n < PROMPT.length) raf = requestAnimationFrame(type); else { u.querySelector(".caret").remove(); scroll(); }
+        };
+        raf = requestAnimationFrame(type);
+        const T = 2200;
+        later(T, () => tool("get_project", "Read the project", 300));
+        later(T + 450, () => tool("analyze_audio", "A cam: ch1 clips 292 times, ch2 is clean", 500));
+        later(T + 1050, () => tool("analyze_audio", "B cam", 400));
+        later(T + 1600, () => tool("sync_assets", "Synced 2 angles · B cam starts 2.73 s after A", 600));
+        later(T + 2350, () => tool("transcribe", "2,240 words, on device", 700));
+        later(T + 3150, () => tool("get_transcript", "Read 4 passages", 400));
+        later(T + 3700, () => {
+            tool("assemble", "Assembled 20 segments · 116.32 s", 1400);
+            vempty.style.opacity = 0; frameView(0, false);
+            v1.forEach((c, i) => { c.style.transitionDelay = i * 55 + "ms"; c.classList.add("in"); });
+            a1.forEach((c, i) => { c.style.transitionDelay = 120 + i * 55 + "ms"; c.classList.add("in"); });
+            tween(0, 20, 1300, (v) => ro.shots.textContent = Math.round(v));
+            tween(0, CUT, 1300, (v) => ro.len.textContent = mmss(v));
+        });
+        later(T + 5300, () => {
+            tool("review_cuts", "Reviewed 20 clips", 1300);
+            v1.forEach((c, i) => { c.style.transitionDelay = ""; if (i < 19) later(i * 60, () => { c.classList.add("hit"); later(380, () => c.classList.remove("hit")); }); });
+        });
+        later(T + 6700, () => add("Every join reads cleanly. Next: lower third, grade, and levels.", "msg ai"));
+        later(T + 7300, () => tool("render_frames", "Rendered 12 frames to check", 500));
+        later(T + 7900, () => { tool("add_clip", "Lower third on V2, lower-right at 1.2×", 400); v2.forEach((c, i) => { c.style.transitionDelay = i * 120 + "ms"; c.classList.add("in"); }); frameView(30, false); });
+        later(T + 8600, () => {
+            tool("set_color", "A cam: A_wide_CLog3-709 · B cam: B_medium_SLog3-709", 500);
+            frameView(30, true); ro.grade.textContent = "2 LUTs"; flash(ro.grade);
+        });
+        later(T + 9300, () => { tool("measure_loudness", "Mix −39.8 LUFS (20 clips)", 400); ro.lufs.textContent = "−39.8"; flash(ro.lufs); });
+        later(T + 9900, () => add("The A cam safety channel is quiet, around −40 LUFS. I'm setting each clip to about −16 LUFS, capped so no peak goes above −1 dBFS.", "msg ai"));
+        later(T + 10700, () => {
+            tool("update_clips", "Clip gain on 20 clips, +18 to +31 dB", 1200);
+            a1.forEach((c, i) => later(i * 50, () => { c.style.setProperty("--amp", 0.85); c.style.setProperty("--gy", "22%"); }));
+            tween(-39.8, -16.7, 1600, (v) => ro.lufs.textContent = "−" + Math.abs(v).toFixed(1), () => flash(ro.lufs));
+        });
+        later(T + 12400, () => tool("measure_loudness", "Mix −16.7 LUFS · peaks −1.0 dBFS", 400));
+        later(T + 13000, () => {
+            add("The Town Hall cut is built: <b>1:56, 20 shots</b>, alternating wide and medium. Dialogue is at <b>−16.7 LUFS</b>, and the lower third sits lower-right, clear of him on both angles.", "msg ai");
+            undo.classList.add("show");
+        });
+        // Then play the cut across the timeline.
+        later(T + 13600, () => {
+            ph.classList.add("on"); $("#viewer").classList.add("playing");
+            const lane = lv1, start = performance.now(), dur = 9000;
+            const go = (now) => {
+                if (my !== run) return;
+                const k = Math.min(1, (now - start) / dur), f = k * (CUT - 1);
+                ph.style.setProperty("--x", (k * lane.clientWidth) + "px");
+                frameView(f, true);
+                if (k < 1) raf = requestAnimationFrame(go);
+                else later(400, () => { ph.style.setProperty("--x", "0px"); frameView(30, true); $("#viewer").classList.remove("playing"); });
+            };
+            raf = requestAnimationFrame(go);
+        });
+    };
+    $("#replay").addEventListener("click", () => reduce ? finalState() : play());
+    if (reduce) { finalState(); return; }
+    let started = false;
+    new IntersectionObserver((es, o) => es.forEach((e) => {
+        if (e.isIntersecting && !started) { started = true; o.disconnect(); setTimeout(play, 300); }
+    }), { threshold: 0.45 }).observe(root);
 })();
 
-// Keep the version and download link pointing at the latest release
-// automatically; the hardcoded values above are the fallback if this
-// fetch fails.
+// ---------- Tabs with videos that advance on their own ----------
+(() => {
+    const tabs = $$("#tabs [role=tab]"), panels = tabs.map((t) => document.getElementById(t.getAttribute("aria-controls")));
+    const toggle = $("#tabs-toggle"), descM = $("#desc-m");
+    let cur = 0, inView = false, userPaused = reduce;
+    const vid = (i) => panels[i].querySelector("video");
+    const sync = () => { const v = vid(cur); toggle.classList.toggle("paused", v.paused); toggle.setAttribute("aria-label", v.paused ? "Play video" : "Pause video"); };
+    const select = (i, focus) => {
+        vid(cur).pause();
+        tabs.forEach((t, j) => { t.setAttribute("aria-selected", j === i); t.tabIndex = j === i ? 0 : -1; t.style.setProperty("--t", 0); });
+        panels.forEach((p, j) => { p.classList.toggle("on", j === i); p.hidden = j !== i; });
+        cur = i;
+        descM.textContent = tabs[i].querySelector("p").textContent;
+        const v = vid(i); v.preload = "auto"; v.currentTime = 0;
+        if (inView && !userPaused) v.play().catch(() => {});
+        if (focus) tabs[i].focus();
+        sync();
+    };
+    tabs.forEach((t, i) => {
+        t.addEventListener("click", () => { userPaused = false; select(i); });
+        t.addEventListener("keydown", (e) => {
+            const k = e.key === "ArrowDown" || e.key === "ArrowRight" ? 1 : e.key === "ArrowUp" || e.key === "ArrowLeft" ? -1 : 0;
+            if (k) { e.preventDefault(); select((i + k + tabs.length) % tabs.length, true); }
+        });
+    });
+    panels.forEach((p, i) => {
+        const v = vid(i);
+        v.addEventListener("timeupdate", () => { if (i === cur && v.duration) tabs[i].style.setProperty("--t", (v.currentTime / v.duration).toFixed(3)); });
+        v.addEventListener("ended", () => { if (i === cur) select((cur + 1) % tabs.length); });
+        v.addEventListener("play", sync); v.addEventListener("pause", sync);
+    });
+    toggle.addEventListener("click", () => { const v = vid(cur); if (v.paused) { userPaused = false; v.play(); } else { userPaused = true; v.pause(); } });
+    descM.textContent = tabs[0].querySelector("p").textContent;
+    new IntersectionObserver((es) => es.forEach((e) => {
+        inView = e.isIntersecting;
+        const v = vid(cur);
+        if (inView && !userPaused) v.play().catch(() => {}); else v.pause();
+    }), { threshold: 0.35 }).observe($("#tabs .stage"));
+    sync();
+})();
+
+// ---------- Before / after ----------
+(() => {
+    const box = $("#compare"), input = $("#cmp"); if (!box) return;
+    const set = (v) => box.style.setProperty("--pos", v + "%");
+    let touched = false;
+    input.addEventListener("input", () => { touched = true; set(input.value); });
+    if (reduce) return;
+    new IntersectionObserver((es, o) => es.forEach((e) => {
+        if (!e.isIntersecting) return; o.disconnect();
+        // A gentle sweep to show it can be dragged.
+        const keys = [[0, 50], [900, 22], [2000, 78], [2900, 50]], t0 = performance.now() + 400;
+        const f = (now) => {
+            if (touched) return;
+            const t = now - t0; if (t < 0) return requestAnimationFrame(f);
+            let v = 50;
+            for (let i = 1; i < keys.length; i++) if (t <= keys[i][0]) { const [a, va] = keys[i - 1], [b, vb] = keys[i], k = (t - a) / (b - a), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; v = va + (vb - va) * e; break; }
+            set(v); input.value = v;
+            if (t < keys[keys.length - 1][0]) requestAnimationFrame(f);
+        };
+        requestAnimationFrame(f);
+    }), { threshold: 0.6 }).observe(box);
+})();
+
+// ---------- Transcript ----------
+(() => {
+    const body = $("#ts-body"), ctx = $("#ctx"); if (!body) return;
+    // Real words and times (seconds in the A camera file).
+    const S = [
+        [[["My",20.94],["name",21.84],["is",21.96],["Scott",22.08],["Stroud.",22.26],["I'm",23.16],["with",23.64],["MHCRM.",23.82]], 25.2],
+        [[["This",25.26],["is",25.68],["our",25.74],["agency,",25.92],["and",26.46],["we",26.64],["focus",26.76],["on",27],["the",27.3],["home",28.26],["building",28.56],["niche.",28.86]], 29.88],
+        [[["One",300.48],["of",301.74],["the",301.92],["things",302.04],["that",302.16],["I",303.06],["have",303.42],["come",303.54],["to",304.2],["appreciate",304.38],["recently",304.56],["is",305.4],["the",307.02],["churn",308.04],["rate.",308.4]], 309.18],
+    ];
+    const ts = (sec) => { const s = Math.floor(sec), f = Math.floor((sec - s) * 24), p = (n) => String(n).padStart(2, "0"); return `00:${p(Math.floor(s / 60))}:${p(s % 60)}:${p(f)}`; };
+    const rows = S.map(([words]) => {
+        const r = document.createElement("div"); r.className = "sent";
+        r.innerHTML = `<span class="t">${ts(words[0][1])}</span><p>${words.map(([w]) => `<span class="wd">${w}</span>`).join(" ")}</p>`;
+        body.append(r); return r;
+    });
+    if (reduce) { $$(".wd", body).forEach((w) => w.classList.add("said")); return; }
+    let active = false, raf = 0;
+    const loop = () => {
+        // Play sentence 1 and 2 at real speed, then select sentence 3 and add it.
+        rows.forEach((r) => r.classList.remove("sel")); ctx.classList.remove("on");
+        $$(".wd", body).forEach((w) => w.classList.remove("said", "now"));
+        const t0 = performance.now(), start = S[0][0][0][1], stop = S[1][1];
+        const tick = (now) => {
+            if (!active) return;
+            const t = start + (now - t0) / 1000;
+            S.slice(0, 2).forEach(([words, end], si) => words.forEach(([, ws], wi) => {
+                const next = wi + 1 < words.length ? words[wi + 1][1] : end;
+                const el = rows[si].querySelectorAll(".wd")[wi];
+                el.classList.toggle("said", t >= ws); el.classList.toggle("now", t >= ws && t < next);
+            }));
+            if (t < stop + 0.4) raf = requestAnimationFrame(tick);
+            else {
+                setTimeout(() => { if (!active) return; rows[2].classList.add("sel"); }, 500);
+                setTimeout(() => { if (!active) return; ctx.style.top = (rows[2].offsetTop + rows[2].offsetHeight * 0.55) + "px"; ctx.classList.add("on"); }, 1100);
+                setTimeout(() => { if (!active) return; ctx.classList.remove("on"); $$(".wd", rows[2]).forEach((w) => w.classList.add("said")); }, 2600);
+                setTimeout(() => { if (active) loop(); }, 5200);
+            }
+        };
+        raf = requestAnimationFrame(tick);
+    };
+    new IntersectionObserver((es) => es.forEach((e) => {
+        if (e.isIntersecting && !active) { active = true; loop(); }
+        else if (!e.isIntersecting) { active = false; cancelAnimationFrame(raf); }
+    }), { threshold: 0.4 }).observe($("#ts"));
+})();
+
+// ---------- Copy buttons ----------
+$$(".copy").forEach((btn) => btn.addEventListener("click", () => {
+    const text = document.getElementById(btn.dataset.copy).textContent;
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => { btn.textContent = "Copied"; setTimeout(() => btn.textContent = "Copy", 1500); }, () => {});
+}));
+
+// ---------- Latest release: version and download link ----------
 fetch("https://api.github.com/repos/tlatvys-ac/speedrun-app/releases/latest")
-    .then((r) => r.json())
+    .then((r) => r.ok ? r.json() : Promise.reject())
     .then((rel) => {
         const v = (rel.tag_name || "").replace(/^v/, "");
-        if (v) {
-            document.getElementById("version").textContent = "v" + v;
-            document.querySelectorAll(".v").forEach((el) => { el.textContent = v; });
-        }
-        const dmg = (rel.assets || []).find((x) => /\.dmg$/.test(x.name));
-        if (dmg) document.getElementById("dl-dmg").href = dmg.browser_download_url;
+        const dmg = (rel.assets || []).find((a) => /\.dmg$/i.test(a.name));
+        if (!v || !dmg) return;
+        $$(".v").forEach((el) => el.textContent = el.closest(".eyebrow") ? v.split(".").slice(0, 2).join(".") : v);
+        $("#version").textContent = "v" + v;
+        $$("a.dl").forEach((a) => a.href = dmg.browser_download_url);
     })
     .catch(() => {});
+})();
 </script>
 </body>
 </html>

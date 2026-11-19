@@ -1,12 +1,18 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><style>
-html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#1B1C26;font-family:-apple-system,"SF Pro Text",sans-serif}
-.l{position:absolute;left:64px;top:118px;width:360px}
-.l img{width:104px;height:104px}
-h1{margin:18px 0 0;color:#fff;font-size:44px;letter-spacing:.22em;font-weight:700}
-p{margin:16px 0 0;color:#B9BCC8;font-size:25px;line-height:1.35}
-.shot{position:absolute;left:470px;top:70px;width:900px;border-radius:14px;border:1px solid #3B3E50;box-shadow:0 30px 80px rgba(0,0,0,.6);overflow:hidden}
+@font-face{font-family:"IS";src:url(../fonts/instrument-sans.woff2)}
+@font-face{font-family:"ISe";src:url(../fonts/instrument-serif-italic.woff2);font-style:italic}
+@font-face{font-family:"JB";src:url(../fonts/jetbrains-mono.woff2)}
+html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#0B0C10;color:#F3F1EC;font-family:"IS",sans-serif}
+body::before{content:"";position:absolute;left:300px;top:260px;width:1100px;height:600px;background:radial-gradient(closest-side,rgba(255,109,120,.22),transparent 75%);filter:blur(10px)}
+.top{position:absolute;left:64px;top:56px;display:flex;align-items:center;gap:14px;font-weight:600;font-size:26px}
+.top img{width:40px;height:40px}
+.top span.m{margin-left:18px;font:500 14px "JB";letter-spacing:.1em;color:#A3A4AE;text-transform:uppercase}
+h1{position:absolute;left:60px;top:118px;margin:0;font-weight:500;font-size:84px;line-height:.95;letter-spacing:-.045em}
+h1 em{display:block;font-family:"ISe";font-style:italic;font-weight:400;letter-spacing:-.02em;font-size:1.05em;background:linear-gradient(100deg,#FF8A5E,#FF6D78 60%,#FF5F8F);-webkit-background-clip:text;color:transparent}
+.shot{position:absolute;left:520px;top:300px;width:820px;border-radius:14px;border:1px solid rgba(255,255,255,.14);box-shadow:0 30px 80px rgba(0,0,0,.8);overflow:hidden}
 .shot img{display:block;width:100%}
 </style></head><body>
-<div class="l"><img src="../images/logo.png"><h1>SPEEDRUN</h1><p>The Mac video editor where Claude builds your edit and you finish it by hand</p></div>
+<div class="top"><img src="../images/logo.png">Speedrun<span class="m">A video editor for the Mac · with Claude</span></div>
+<h1>Ask for the cut.<em>Finish it by hand.</em></h1>
 <div class="shot"><img src="../images/editor.jpg"></div>
 </body></html>
