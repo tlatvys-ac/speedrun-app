@@ -55,8 +55,10 @@ calls the UI makes), so no pointer is shown. Recipe in `tools/recording/`:
 - `speedrun-wordmark-dark-bg.svg`: the "speed|run" playhead wordmark (outlined
   JetBrains Mono 800, from the logo kit). The header and footer inline the same
   SVG so the playhead color can change on hover.
-- `logo.png` (OG image only), favicons, `apple-touch-icon.png`: from Speedrun's
-  `Resources/AppIcon.icns` (`iconutil -c iconset`).
+- `favicon.svg`, `favicon.ico`, `apple-touch-icon.png`, `icon-192/512.png`:
+  the web set from the app icon kit (the s|r playhead monogram).
+- `app-icon.png`: the macOS icon master (1024, Apple grid with shadow), used
+  by the OG image. The app bundles the same art as `Resources/AppIcon.icns`.
 - `editor.jpg` (used by the OG image): a window screenshot
   (`screencapture -o -l <wid>`) kept losslessly in `tools/originals/`.
 - Footage stills: frames of the camera files with `ffmpeg -ss <t>`, graded
