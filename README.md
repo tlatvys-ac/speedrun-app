@@ -52,7 +52,10 @@ calls the UI makes), so no pointer is shown. Recipe in `tools/recording/`:
 
 ## Images
 
-- `logo.png`, favicons, `apple-touch-icon.png`: from Speedrun's
+- `speedrun-wordmark-dark-bg.svg`: the "speed|run" playhead wordmark (outlined
+  JetBrains Mono 800, from the logo kit). The header and footer inline the same
+  SVG so the playhead color can change on hover.
+- `logo.png` (OG image only), favicons, `apple-touch-icon.png`: from Speedrun's
   `Resources/AppIcon.icns` (`iconutil -c iconset`).
 - `editor.jpg` (used by the OG image): a window screenshot
   (`screencapture -o -l <wid>`) kept losslessly in `tools/originals/`.
