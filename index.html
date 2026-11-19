@@ -143,7 +143,8 @@ h1, h2, h3 { margin: 0; font-weight: 500; }
 .h3 { font-size: clamp(28px, 3.2vw, 44px); line-height: 1.02; letter-spacing: -0.03em; }
 .lede { font-size: clamp(18px, 1.5vw, 21px); line-height: 1.5; color: var(--muted); max-width: 31em; margin: 0; }
 .lede strong { color: var(--text); font-weight: 500; }
-.grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: 0.06em; }
+/* The gradient only paints inside the box, so extend it past the descenders (y) and give the space back. */
+.grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; padding: 0 0.06em 0.22em 0; margin-bottom: -0.22em; }
 
 /* Word-by-word reveal (only when JS has split the heading). */
 .js [data-split] .w { display: inline-block; white-space: nowrap; }
