@@ -32,8 +32,8 @@ Instrument Sans, Instrument Serif (italic), JetBrains Mono, latin subset only.
 
 ## Videos
 
-All five are real recordings of Speedrun 0.2.0 on the Scott Stroud
-interview (published with the user's OK, 2026-11-18). The Claude runs are
+All five are real recordings of Speedrun 0.3.0 on the Scott Stroud
+interview (published with the user's OK, 2026-11-18; re-recorded for 0.3.0 on 2026-11-19). The Claude runs are
 real; the clicks and keys were sent through Speedrun's test hooks (the same
 calls the UI makes), so no pointer is shown. Recipe in `tools/recording/`:
 
@@ -59,8 +59,9 @@ calls the UI makes), so no pointer is shown. Recipe in `tools/recording/`:
   the web set from the app icon kit (the s|r playhead monogram).
 - `app-icon.png`: the macOS icon master (1024, Apple grid with shadow), used
   by the OG image. The app bundles the same art as `Resources/AppIcon.icns`.
-- `editor.jpg` (used by the OG image): a window screenshot
-  (`screencapture -o -l <wid>`) kept losslessly in `tools/originals/`.
+- `editor.jpg` (used by the OG image): a window screenshot of the hero project
+  (`screencapture -o -l <wid>`, title bar cropped), kept losslessly as
+  `tools/originals/editor.png`.
 - Footage stills: frames of the camera files with `ffmpeg -ss <t>`, graded
   with `lut3d=<camera .cube>` where needed (A cam at 24 s, B cam at 30.5 s),
   scaled with lanczos. The lower third is frame 4 s of `Scott Stroud_L3_V5.mov`.

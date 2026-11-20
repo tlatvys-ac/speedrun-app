@@ -8,6 +8,7 @@ def call(method, params):
 def tool(name, args): return call("tools/call", {"name": name, "arguments": args})
 ids = json.loads(sys.argv[1]); wid = sys.argv[2]
 tool("seek", {"at": "01:00:03:12"})
+call("speedrun/transport", {"action": "tab", "tab": "Properties"})   # the panel the take shows updating
 call("speedrun/viewer_box", {"clip": "nothing"})
 try: os.remove('/tmp/srtest/rec/stop')
 except FileNotFoundError: pass
