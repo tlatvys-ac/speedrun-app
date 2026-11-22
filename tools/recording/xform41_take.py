@@ -8,15 +8,15 @@ def call(method, params):
 def tool(name, args): return call("tools/call", {"name": name, "arguments": args})
 ids = json.loads(sys.argv[1]); wid = sys.argv[2]
 tool("seek", {"at": "01:00:03:12"})
-call("speedrun/transport", {"action": "tab", "tab": "Properties"})   # the panel the take shows updating
+call("speedrun/transport", {"action": "tab", "tab": "Program"})   # the panel the take shows updating
 call("speedrun/viewer_box", {"clip": "nothing"})
 try: os.remove('/tmp/srtest/rec/stop')
 except FileNotFoundError: pass
-rec = subprocess.Popen(['/tmp/srtest/rec/wrec', wid, '/tmp/srtest/demo/xform_raw.mov'])
+rec = subprocess.Popen(['/tmp/srtest/rec/wrec', wid, '/tmp/srtest/demo/xform41_raw.mov'])
 time.sleep(2.5)
 call("speedrun/viewer_box", {"clip": ids[0][:8]})   # = double-click
 time.sleep(1.2)
-st = dict(x=1384, y=586, scale=1.2, rotation=0)
+st = dict(x=1000, y=420, scale=1.0, rotation=0)
 def ease(u): return 0.5 - 0.5 * math.cos(math.pi * u)
 def go(dur, **target):
     a = dict(st); n = int(dur * 30)
@@ -26,9 +26,9 @@ def go(dur, **target):
         call("speedrun/viewer_box", {"clip": ids[0][:8], "transform": cur})
         time.sleep(1 / 30)
     st.update(target)
-go(1.3, x=1060, y=470)          # drag to move
+go(1.3, x=640, y=300)          # drag to move
 time.sleep(0.5)
-go(1.1, scale=1.6)              # corner drag to scale
+go(1.1, scale=1.4)              # corner drag to scale
 time.sleep(0.5)
 go(0.9, rotation=-8)            # rotate
 time.sleep(0.3)

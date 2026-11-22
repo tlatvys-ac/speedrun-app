@@ -8,11 +8,11 @@ def call(method, params):
 def tr(**a): return call("speedrun/transport", a)
 def src(**a): return call("speedrun/source", a)
 wid = sys.argv[1]
-tr(action="seek", frame=1036); tr(action="zoom_range", **{"from": 640, "to": 1640}); tr(action="tab", tab="Markers")
+tr(action="seek", frame=1036); tr(action="zoom_range", **{"from": 640, "to": 1640}); tr(action="tab", tab="Project"); tr(action="tab", tab="Source"); tr(action="tab", tab="Program")
 time.sleep(1.5); tr(action="zoom_range", **{"from": 640, "to": 1640}); time.sleep(0.5)
 try: os.remove('/tmp/srtest/rec/stop')
 except FileNotFoundError: pass
-rec = subprocess.Popen(['/tmp/srtest/rec/wrec', wid, '/tmp/srtest/demo/source_raw.mov'])
+rec = subprocess.Popen(['/tmp/srtest/rec/wrec', wid, '/tmp/srtest/demo/source41_raw.mov'])
 time.sleep(2.0)
 print(src(action="load", asset="Scott_B CAM_WS_C0252", at=402.0)); time.sleep(1.8)   # double-click in the Project panel
 src(action="in"); time.sleep(0.6)                                                   # I

@@ -7,7 +7,7 @@
 <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="images/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-<meta name="description" content="Speedrun is a free video editor for the Mac with Claude built in. Ask for the edit, and Claude syncs the cameras, reads the transcript and cuts a real multi-track timeline. Then trim, grade and hand it to Premiere.">
+<meta name="description" content="Speedrun is a free video editor for the Mac with Claude built in. Ask for a cut, and Claude syncs the cameras, reads the transcripts and builds a real multi-track timeline. Then trim, retime, grade, take rounds of notes and hand it to Premiere.">
 <meta name="theme-color" content="#0B0C10">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tlatvys-ac.github.io/speedrun-app/">
@@ -16,7 +16,7 @@
 <meta property="og:image" content="https://tlatvys-ac.github.io/speedrun-app/images/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Speedrun: Ask for the cut. Finish it by hand. Above the editor with a two-camera interview on the timeline.">
+<meta property="og:image:alt" content="Speedrun: Ask for the cut. Finish it by hand. Above the editor with a finished two-camera cut on the timeline.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin>
@@ -438,6 +438,26 @@ footer { padding: 64px 0 56px; border-top: 1px solid var(--line); margin-top: 40
 .foot p { margin: 14px 0 0; color: var(--dim); font: 500 12px/1.6 var(--mono); letter-spacing: 0.04em; }
 
 /* ---------- Responsive ---------- */
+/* Stills: a wide shot, 3-up tiles and a lightbox */
+.shot { margin: 0; }
+.zoom { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; color: inherit; font: inherit; }
+.zoom img { display: block; width: 100%; height: auto; }
+.zoom:focus-visible { outline: 2px solid var(--coral); outline-offset: 4px; border-radius: 14px; }
+.shot + .more { margin-top: clamp(48px, 6vw, 80px); }
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin: clamp(48px, 6vw, 80px) 0 0; }
+.tile { margin: 0; }
+.tile .zoom { border-radius: 14px; overflow: hidden; border: 1px solid var(--line-2); background: #08090C; }
+.tile img { aspect-ratio: 4 / 3; object-fit: cover; object-position: center; transition: transform 0.5s var(--ease); }
+.tile .zoom:hover img { transform: scale(1.03); }
+.tile figcaption { margin-top: 12px; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.tile figcaption b { color: var(--text); font-weight: 500; }
+.tiles + .more { margin-top: clamp(40px, 5vw, 64px); }
+.lb { border: 0; padding: 0; background: transparent; max-width: min(1600px, 96vw); max-height: 94vh; overflow: visible; }
+.lb::backdrop { background: rgba(5, 6, 9, 0.88); backdrop-filter: blur(6px); }
+.lb img { display: block; max-width: min(1600px, 96vw); max-height: 88vh; width: auto; height: auto; border-radius: 12px; border: 1px solid var(--line-2); }
+.lb p { margin: 12px 0 0; font-size: 14px; color: var(--muted); text-align: center; }
+.lb .close { position: absolute; top: -18px; right: -18px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line-2); background: var(--bg-3); color: var(--text); font: 400 22px/1 var(--sans); cursor: pointer; }
+.lb .close:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
 @media (max-width: 1100px) {
     .nav-tc { display: none; }
     .nav-links { margin-left: auto; }
@@ -448,6 +468,7 @@ footer { padding: 64px 0 56px; border-top: 1px solid var(--line); margin-top: 40
     .more { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 900px) {
+    .tiles { grid-template-columns: 1fr; gap: 32px; }
     .nav-links { display: none; }
     .nav-in .btn { margin-left: auto; }
     .hero-grid, .sec-head, .split, .tabs, .faq, .callout { grid-template-columns: 1fr; }
@@ -505,7 +526,7 @@ footer { padding: 64px 0 56px; border-top: 1px solid var(--line); margin-top: 40
         <a class="brand sr-logo-link" href="#top" aria-label="Speedrun, back to top"><svg class="sr-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 -4 370.56 108" role="img" aria-label="Speedrun" focusable="false"><title>Speedrun</title><path fill="currentColor" d="M21.05 80.12Q15.88 80.12 12.01 78.49Q8.13 76.85 5.97 73.96Q3.8 71.08 3.8 67.2H15.2Q15.2 69.02 16.83 70.13Q18.47 71.23 21.05 71.23H24.4Q27.51 71.23 29.15 70.09Q30.78 68.95 30.78 66.9Q30.78 65 29.34 63.97Q27.89 62.94 24.85 62.56L19.99 61.96Q12.16 60.97 8.59 58.16Q5.02 55.34 5.02 49.57Q5.02 43.49 9.2 40.14Q13.38 36.8 21.43 36.8H24.32Q32 36.8 36.56 40.14Q41.12 43.49 41.12 49.11H29.72Q29.72 47.59 28.23 46.64Q26.75 45.69 24.32 45.69H21.43Q18.62 45.69 17.33 46.64Q16.04 47.59 16.04 49.49Q16.04 51.24 17.21 52.15Q18.39 53.06 20.98 53.44L26.22 54.13Q34.12 55.12 37.96 58.08Q41.8 61.04 41.8 66.9Q41.8 73.28 37.39 76.7Q32.98 80.12 24.4 80.12Z M47.58 93.04V37.56H58.6V45.54H58.82Q59.36 42.04 61.56 39.76Q64.52 36.8 69.69 36.8Q76 36.8 79.8 41.25Q83.6 45.69 83.6 53.14V63.78Q83.6 68.72 81.89 72.41Q80.18 76.09 77.06 78.11Q73.95 80.12 69.69 80.12Q64.52 80.12 61.56 77.08Q59.36 74.88 58.82 71.38H58.6L58.98 81.64V93.04ZM65.59 70.24Q68.78 70.24 70.49 68.45Q72.2 66.67 72.2 63.4V53.52Q72.2 50.18 70.49 48.43Q68.78 46.68 65.59 46.68Q62.47 46.68 60.72 48.47Q58.98 50.25 58.98 53.52V63.4Q58.98 66.67 60.72 68.45Q62.47 70.24 65.59 70.24Z M108 80.12Q102.45 80.12 98.31 78.03Q94.16 75.94 91.92 72.18Q89.68 68.42 89.68 63.4V53.52Q89.68 48.5 91.92 44.74Q94.16 40.98 98.31 38.89Q102.45 36.8 108 36.8Q113.54 36.8 117.61 38.89Q121.68 40.98 123.92 44.74Q126.16 48.5 126.16 53.52V61.12H100.55V63.4Q100.55 67.35 102.45 69.37Q104.35 71.38 108.15 71.38Q110.81 71.38 112.44 70.47Q114.08 69.56 114.61 67.96H125.78Q124.41 73.43 119.59 76.78Q114.76 80.12 108 80.12ZM115.29 54.51V53.37Q115.29 49.49 113.51 47.44Q111.72 45.39 108 45.39Q104.27 45.39 102.41 47.52Q100.55 49.64 100.55 53.52V54.66Z M150.56 80.12Q145.01 80.12 140.87 78.03Q136.72 75.94 134.48 72.18Q132.24 68.42 132.24 63.4V53.52Q132.24 48.5 134.48 44.74Q136.72 40.98 140.87 38.89Q145.01 36.8 150.56 36.8Q156.1 36.8 160.17 38.89Q164.24 40.98 166.48 44.74Q168.72 48.5 168.72 53.52V61.12H143.11V63.4Q143.11 67.35 145.01 69.37Q146.91 71.38 150.71 71.38Q153.37 71.38 155 70.47Q156.64 69.56 157.17 67.96H168.34Q166.97 73.43 162.15 76.78Q157.32 80.12 150.56 80.12ZM157.85 54.51V53.37Q157.85 49.49 156.07 47.44Q154.28 45.39 150.56 45.39Q146.83 45.39 144.97 47.52Q143.11 49.64 143.11 53.52V54.66Z M188.71 80.12Q182.4 80.12 178.6 75.71Q174.8 71.3 174.8 63.78V53.14Q174.8 45.69 178.6 41.25Q182.4 36.8 188.71 36.8Q193.88 36.8 196.84 39.76Q199.04 42.04 199.58 45.54H199.8L199.42 35.28V23.88H210.82V79.36H199.8V71.38H199.58Q199.04 74.88 196.84 77.08Q193.88 80.12 188.71 80.12ZM192.81 70.24Q195.93 70.24 197.68 68.45Q199.42 66.67 199.42 63.4V53.52Q199.42 50.25 197.68 48.47Q195.93 46.68 192.81 46.68Q189.62 46.68 187.91 48.47Q186.2 50.25 186.2 53.52V63.4Q186.2 66.67 187.91 68.45Q189.62 70.24 192.81 70.24Z"/><rect style="fill:var(--sr-accent, #FF6A3D)" x="225.84" y="0" width="4" height="104" rx="2"/><path style="fill:var(--sr-accent, #FF6A3D)" d="M218.84 -4h18l-9 12z"/><path style="fill:var(--sr-run, #8A8F98)" d="M246.07 79.36V37.56H256.71V45.54H256.86Q257.55 42.27 259.45 40.22Q262.56 36.8 268.57 36.8Q275.48 36.8 279.32 40.98Q283.16 45.16 283.16 52.76V56.18H271V53.52Q271 50.1 269.14 48.2Q267.28 46.3 264.16 46.3Q260.89 46.3 259.18 48.2Q257.47 50.1 257.47 53.52V79.36Z M305.2 80.12Q296.76 80.12 292.01 75.56Q287.26 71 287.26 63.1V37.56H298.66V63.02Q298.66 66.52 300.34 68.38Q302.01 70.24 305.2 70.24Q308.32 70.24 310.03 68.38Q311.74 66.52 311.74 63.02V37.56H323.14V63.1Q323.14 71.08 318.35 75.6Q313.56 80.12 305.2 80.12Z M329.98 79.36V37.56H341V45.54H341.22Q341.83 42.04 344.04 39.84Q347.08 36.8 352.24 36.8Q358.32 36.8 362.01 41.06Q365.7 45.31 365.7 52.38V79.36H354.3V53.52Q354.3 50.25 352.59 48.47Q350.88 46.68 347.76 46.68Q344.72 46.68 343.05 48.47Q341.38 50.25 341.38 53.52V79.36Z"/></svg></a>
         <ul class="nav-links">
             <li><a href="#claude">Claude</a></li>
-            <li><a href="#notes">Markers</a></li>
+            <li><a href="#notes">Notes</a></li>
             <li><a href="#hands">By hand</a></li>
             <li><a href="#color">Color</a></li>
             <li><a href="#export">Export</a></li>
@@ -523,11 +544,11 @@ footer { padding: 64px 0 56px; border-top: 1px solid var(--line); margin-top: 40
 <main id="main">
 <header class="hero" id="top">
     <div class="wrap">
-        <p class="eyebrow reveal"><span class="flag" style="--c:#4CCC66"></span>Speedrun <span class="v">0.3</span><span class="sep"></span><span>A video editor for the Mac</span></p>
+        <p class="eyebrow reveal"><span class="flag" style="--c:#4CCC66"></span>Speedrun <span class="v">0.4</span><span class="sep"></span><span>A video editor for the Mac</span></p>
         <h1 class="display" data-split><span class="l">Ask for the cut.</span> <em class="l grad-text">Finish it by hand.</em></h1>
         <div class="hero-grid">
             <div class="hero-side reveal" style="--d:500ms">
-                <p class="lede">Speedrun is a Mac video editor with <strong>Claude built in</strong>. Say what you want, and Claude syncs the cameras, reads the transcript and cuts a real multi-track timeline. Then it's yours to trim, grade and hand to Premiere.</p>
+                <p class="lede">Speedrun is a Mac video editor with <strong>Claude built in</strong>. Ask for a cut, and Claude syncs your cameras, reads the transcripts and builds a real multi-track timeline with Speedrun's own tools. Then trim, retime, grade and mix it yourself, and hand it to Premiere.</p>
                 <div class="cta-row">
                     <a class="btn dl" href="https://github.com/tlatvys-ac/speedrun-app/releases/latest/download/Speedrun-0.4.1.dmg">
                         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8.5M4.5 7 8 10.5 11.5 7M3 13.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -539,10 +560,10 @@ footer { padding: 64px 0 56px; border-top: 1px solid var(--line); margin-top: 40
         </div>
         <div class="hero-media reveal" style="--d:700ms">
             <div class="frame hero-frame" id="hero-frame">
-                <video class="auto" src="images/hero.mp4" poster="images/hero-poster.jpg" width="1800" height="1048" muted loop playsinline autoplay preload="auto" aria-label="Speedrun's editor as Claude builds a two-camera interview cut from one request: clips land on the timeline, the picture is graded, a lower third is added, and the finished cut plays."></video>
+                <video class="auto" src="images/hero.mp4" poster="images/hero-poster.jpg" width="1600" height="924" muted loop playsinline autoplay preload="auto" aria-label="Speedrun's editor as Claude builds a two-camera cut from one request: the Claude panel shimmers and a glow crosses the timeline while clips land on it, the picture is graded, a lower third is added, and the finished cut plays."></video>
                 <button class="vtoggle" type="button" aria-label="Pause video"><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 2h2.2v10H3.5zM8.3 2h2.2v10H8.3z" fill="currentColor"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg></button>
             </div>
-            <div class="caption"><span class="rec"><i></i>Real run · one request, start to finish</span><span>3 min 32 s of Claude's work · shown 12× faster</span></div>
+            <div class="caption"><span class="rec"><i></i>Real run · one request, start to finish</span><span>4 min of Claude's work · shown 12× faster</span></div>
         </div>
     </div>
 </header>
@@ -553,79 +574,52 @@ footer { padding: 64px 0 56px; border-top: 1px solid var(--line); margin-top: 40
         <div class="sec-head">
             <div>
                 <p class="eyebrow reveal"><span class="flag" style="--c:#EB4D4D"></span><span class="tc">01</span><span class="sep"></span>Claude builds the edit</p>
-                <h2 class="h2" id="claude-h" data-split>One request. <em>Eighteen shots.</em></h2>
+                <h2 class="h2" id="claude-h" data-split>Real tools. <em>A real timeline.</em></h2>
             </div>
-            <p class="lede reveal" style="--d:200ms">Claude edits through Speedrun's own tools, so every step lands on the timeline while you watch. Below is the run from the video, condensed: the real prompt, the real tool calls and the real cut. The whole request is <strong>one undo</strong>.</p>
+            <p class="lede reveal" style="--d:200ms">Claude doesn't hand you a script to import. It edits inside Speedrun with <strong>37 editing tools</strong>, so every step lands on the timeline while you watch, and the whole request is <strong>one undo</strong>. Drop in a notes file, media, bins or sequences to show it what you mean.</p>
         </div>
-
-        <div class="agent reveal" id="agent" aria-label="Animated replay of the Claude run: the request, each tool call, and the timeline it builds">
-            <div class="chat">
-                <div class="chat-tabs" aria-hidden="true"><span class="on">Claude</span><span>Properties</span><span>Markers</span><span>Transcript</span></div>
-                <div class="chat-body" id="chat" aria-live="off"></div>
-                <div class="chat-input" aria-hidden="true"><span>Ask Claude to edit…</span><span class="undo" id="undo">⌘Z undoes all of it</span></div>
-            </div>
-            <div class="edit">
-                <div class="viewer-wrap">
-                    <div class="viewer" id="viewer">
-                        <picture><source srcset="images/viewer-log.avif" type="image/avif"><img data-v="log" src="images/viewer-log.jpg" alt="" loading="lazy" width="1280" height="720"></picture>
-                        <picture><source srcset="images/viewer-lut.avif" type="image/avif"><img data-v="a" src="images/viewer-lut.jpg" alt="" loading="lazy" width="1280" height="720"></picture>
-                        <picture><source srcset="images/viewer-b.avif" type="image/avif"><img data-v="b" src="images/viewer-b.jpg" alt="" loading="lazy" width="1280" height="720"></picture>
-                        <img class="l3" data-v="l3" src="images/lower-third.png" alt="" loading="lazy" width="400" height="300">
-                        <div class="viewer-empty" id="vempty">2 cameras · 1 graphic<br>Nothing on the timeline yet</div>
-                        <div class="viewer-tc" id="vtc">01:00:00:00</div>
-                    </div>
-                </div>
-                <div class="readouts" aria-hidden="true">
-                    <div><small>Shots</small><b id="r-shots">0</b></div>
-                    <div><small>Length</small><b id="r-len">0:00</b></div>
-                    <div><small>Dialogue</small><b id="r-lufs">—</b></div>
-                    <div><small>Grade</small><b id="r-grade">—</b></div>
-                </div>
-                <div class="tl" id="tl" aria-hidden="true">
-                    <div class="tl-ruler"><div></div><div class="lane" id="ruler"></div></div>
-                    <div class="tl-row v2"><div class="hd">V2</div><div class="lane" id="lane-v2"></div></div>
-                    <div class="tl-row v1"><div class="hd">V1</div><div class="lane" id="lane-v1"></div></div>
-                    <div class="tl-row a1"><div class="hd">A1</div><div class="lane" id="lane-a1"></div></div>
-                    <div class="playhead" id="ph"></div>
-                </div>
-            </div>
-        </div>
-        <div class="agent-foot reveal">
-            <span>Condensed from 50 tool calls · Scott interview, 2 cameras, 15 min of footage</span>
-            <button class="replay" id="replay" type="button"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7a4.5 4.5 0 1 0 1.4-3.3M2.5 2v2.6h2.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Replay</button>
-        </div>
-        <noscript><p class="lede" style="margin-top:24px">Claude synced the two cameras, transcribed 2,238 words, assembled 18 shots that switch angle at every cut, checked every join, added the lower third, applied both LUTs and set dialogue to −17.1 LUFS.</p></noscript>
-
-        <div class="stats" id="stats">
-            <div class="stat reveal"><b data-count="2">2</b><span>cameras synced by their sound, with a drift check</span></div>
-            <div class="stat reveal" style="--d:100ms"><b data-count="2238" data-sep>2,238</b><span>words transcribed on your Mac, with word timings</span></div>
-            <div class="stat reveal" style="--d:200ms"><b data-count="18">18</b><span>shots checked word by word on both sides of every cut</span></div>
-            <div class="stat reveal" style="--d:300ms"><b data-count="1">1</b><span>undo for the whole request, if you'd rather not</span></div>
+        <figure class="shot reveal">
+            <div class="frame"><button class="zoom" type="button" data-full="images/claude-working.jpg" aria-label="Enlarge: Speedrun while Claude works"><picture><source srcset="images/claude-working.avif" type="image/avif"><img src="images/claude-working.jpg" alt="Speedrun mid-request: the Claude panel has a shimmering red outline and lists the tools it has run, a glow runs across the timeline, and 19 clips have landed on V1 and A1." width="1800" height="1040" loading="lazy"></picture></button></div>
+            <figcaption class="caption"><span>While Claude works, its panel shimmers and a glow moves across the timeline</span><span>Real run · 0.4</span></figcaption>
+        </figure>
+        <div class="more">
+            <div class="reveal"><b>Sync and sound</b><span>Lines up any number of cameras by their audio, checks for drift, and picks the cleanest mic channel.</span></div>
+            <div class="reveal" style="--d:60ms"><b>Transcripts</b><span>Transcribes on your Mac with word timings, then searches what was said to find the takes you asked for.</span></div>
+            <div class="reveal" style="--d:120ms"><b>Assembly</b><span>Builds the cut from transcript ranges, switches angles, splits, trims, retimes and adds dissolves.</span></div>
+            <div class="reveal"><b>Checks its work</b><span>Reviews every cut word by word on both sides, and renders still frames to check the grade, framing and graphics.</span></div>
+            <div class="reveal" style="--d:60ms"><b>Grade and mix</b><span>Applies each camera's LUT, matches the angles, sets loudness per clip, and cleans up hum and noise.</span></div>
+            <div class="reveal" style="--d:120ms"><b>Titles and bins</b><span>Adds titles and lower thirds, files media into bins, and makes new sequences and versions.</span></div>
         </div>
     </div>
 </section>
 
-<!-- 02 — Markers -->
+<!-- 02 — Notes -->
 <section class="sec" id="notes" aria-labelledby="notes-h">
     <div class="wrap">
         <div class="sec-head">
             <div>
-                <p class="eyebrow reveal"><span class="flag" style="--c:#FA9433"></span><span class="tc">02</span><span class="sep"></span>Markers</p>
+                <p class="eyebrow reveal"><span class="flag" style="--c:#FA9433"></span><span class="tc">02</span><span class="sep"></span>Rounds of notes</p>
                 <h2 class="h2" id="notes-h" data-split>Leave a note. <em>Claude takes it from there.</em></h2>
             </div>
-            <p class="lede reveal" style="--d:200ms">Press <kbd>M</kbd> where something's off and say what you want. Claude works through your feedback markers, makes each fix, and tags the marker Done.</p>
+            <p class="lede reveal" style="--d:200ms">Press <kbd>M</kbd> where something's off and write what you want. Type <kbd>/</kbd> in the Claude box to point at the note. Before Claude changes anything, Speedrun keeps the cut as it was, so every round of notes is a new version.</p>
         </div>
         <div class="split">
             <div class="reveal"><div class="frame">
-                <video class="auto" src="images/markers.mp4" poster="images/markers-poster.jpg" width="1600" height="960" muted loop playsinline autoplay preload="metadata" aria-label="A red Feedback marker reading 'This one drags' is added on the timeline. Claude is asked to handle it: it trims the hesitation, switches angle to avoid a jump cut, and tags the marker Done."></video>
+                <video class="auto" src="images/notes.mp4" poster="images/notes-poster.jpg" width="1600" height="924" muted loop playsinline autoplay preload="metadata" aria-label="A red Feedback marker, 'Tighten this shot', is added on the timeline. In the Claude box, /feedback lists it and it's attached. Claude trims the shot; the sequence becomes Town Hall_V2, the old cut moves into a z_OLD CUTS bin, and Claude asks whether to delete the addressed marker."></video>
                 <button class="vtoggle" type="button" aria-label="Pause video"><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 2h2.2v10H3.5zM8.3 2h2.2v10H8.3z" fill="currentColor"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg></button>
             </div>
             <div class="caption"><span class="rec"><i></i>Real run</span><span>Claude's part shown 6× faster</span></div></div>
             <ul class="list reveal" style="--d:150ms">
-                <li><b><span class="tag" style="background:rgba(235,77,77,.18);color:#FF8A8A">Feedback</span>Sequence markers</b>Revision notes at a frame on the timeline. Claude reads the note, fixes it and tags it Done.</li>
-                <li><b><span class="tag" style="background:rgba(76,204,102,.16);color:#7EE29A">Selects</span>Clip markers</b>Great moments in the footage itself. They follow the clip into any sequence, and Claude builds first cuts from them.</li>
-                <li><b><span class="tag" style="background:rgba(77,140,250,.18);color:#8DB5FF">Premiere</span>They travel</b>Markers go out in Premiere XML with their notes and tags, and into EDLs as locators.</li>
+                <li><b><span class="tag" style="background:rgba(235,77,77,.18);color:#FF8A8A">/</span>Point at markers</b>Type <kbd>/feedback</kbd>, <kbd>/selects</kbd> or any tag to list those markers, or <kbd>/marker</kbd> for all of them. Pick one and Claude gets its frame and full note.</li>
+                <li><b><span class="tag" style="background:rgba(250,148,51,.18);color:#FFB877">V2</span>Every round is a version</b>The open sequence becomes Name_V2, and a copy of the cut as it was goes into a z_OLD CUTS bin.</li>
+                <li><b><span class="tag" style="background:rgba(76,204,102,.16);color:#7EE29A">Done</span>Review what's addressed</b>Notes Claude has dealt with get a green dot. When you've checked them, delete them in one click or keep them.</li>
+                <li><b><span class="tag" style="background:rgba(77,140,250,.18);color:#8DB5FF">Selects</span>Clip markers too</b>Mark great moments in the footage itself, and Claude builds first cuts from them. Markers go to Premiere with their notes and tags.</li>
             </ul>
+        </div>
+        <div class="tiles">
+            <figure class="tile reveal"><button class="zoom" type="button" data-full="images/notes-mention.png" aria-label="Enlarge: the / marker list"><picture><source srcset="images/notes-mention.avif" type="image/avif"><img src="images/notes-mention.png" alt="The Claude box with '/feedback' typed, above a list showing the Feedback marker 'Tighten this shot' with its timecode and note." width="1064" height="798" loading="lazy"></picture></button><figcaption><b>/ mentions</b> — the list filters as you type; Return or Tab attaches the marker</figcaption></figure>
+            <figure class="tile reveal" style="--d:80ms"><button class="zoom" type="button" data-full="images/notes-review.png" aria-label="Enlarge: the review of addressed notes"><picture><source srcset="images/notes-review.avif" type="image/avif"><img src="images/notes-review.png" alt="Claude's reply saying the old cut is saved in z_OLD CUTS and the change is in Town Hall_V2, above 'Claude addressed 1 note' with Delete 1 Marker and Keep Them buttons." width="1064" height="798" loading="lazy"></picture></button><figcaption><b>Review</b> — addressed notes wait for you, with a green dot on the Claude tab</figcaption></figure>
+            <figure class="tile reveal" style="--d:160ms"><button class="zoom" type="button" data-full="images/notes-badge.jpg" aria-label="Enlarge: a marker shown on the picture"><picture><source srcset="images/notes-badge.avif" type="image/avif"><img src="images/notes-badge.jpg" alt="The program monitor parked on a marker: its red flag with a green addressed dot and the name 'Tighten this shot' sit at the bottom of the picture." width="1064" height="798" loading="lazy"></picture></button><figcaption><b>On the frame</b> — park on a marker to see its flag and name over the picture; click any marker to jump to it</figcaption></figure>
         </div>
     </div>
 </section>
@@ -649,12 +643,12 @@ footer { padding: 64px 0 56px; border-top: 1px solid var(--line); margin-top: 40
                 </button>
                 <button class="tab" role="tab" id="tab-box" aria-controls="p-box" aria-selected="false" tabindex="-1">
                     <h3>Viewer box <small>Double-click</small></h3>
-                    <p><span>Move, scale and rotate a clip right on the picture. The Properties panel follows along, each drag is one undo, and animated properties get a keyframe.</span></p>
+                    <p><span>Move, scale and rotate a clip right on the picture. Each drag is one undo, and animated properties get a keyframe.</span></p>
                     <span class="bar"></span>
                 </button>
                 <button class="tab" role="tab" id="tab-src" aria-controls="p-src" aria-selected="false" tabindex="-1">
                     <h3>Source monitor <small>I · O · ,</small></h3>
-                    <p><span>Mark a range in the camera file, then insert it at the playhead with <kbd>,</kbd> or overwrite with <kbd>.</kbd>. <kbd>F</kbd> opens the clip under the playhead at the same frame.</span></p>
+                    <p><span>Mark a range in the camera file, then insert it with <kbd>,</kbd> or overwrite with <kbd>.</kbd> on the tracks its patches point to. With in and out points on both sides, Fit Clip asks how to make them match.</span></p>
                     <span class="bar"></span>
                 </button>
             </div>
@@ -662,17 +656,30 @@ footer { padding: 64px 0 56px; border-top: 1px solid var(--line); margin-top: 40
                 <p class="desc-m" id="desc-m"></p>
                 <div class="frame" style="--ar: 16 / 11">
                     <div class="panel on" role="tabpanel" id="p-trim" aria-labelledby="tab-trim">
-                        <video src="images/trim.mp4" poster="images/trim-poster.jpg" width="940" height="690" muted playsinline preload="metadata" aria-label="Trim mode: A and B monitors above the timeline with yellow rollers on the cut. The cut rolls six frames, then the B side and the A side are trimmed while playing."></video>
+                        <video src="images/trim.mp4" poster="images/trim-poster.jpg" width="1048" height="716" muted playsinline preload="metadata" aria-label="Trim mode: A and B monitors above the timeline with yellow rollers on the cut. The cut rolls six frames, then the B side and the A side are trimmed while playing."></video>
                     </div>
                     <div class="panel" role="tabpanel" id="p-box" aria-labelledby="tab-box" hidden>
-                        <video src="images/transform.mp4" poster="images/transform-poster.jpg" width="1280" height="682" muted playsinline preload="none" aria-label="The lower third gets a bounding box in the viewer, then is moved, scaled and rotated while the Properties panel updates."></video>
+                        <video src="images/transform.mp4" poster="images/transform-poster.jpg" width="1054" height="776" muted playsinline preload="none" aria-label="The lower third gets a bounding box in the program monitor, then is moved, scaled and rotated."></video>
                     </div>
                     <div class="panel" role="tabpanel" id="p-src" aria-labelledby="tab-src" hidden>
-                        <video src="images/source.mp4" poster="images/source-poster.jpg" width="1200" height="714" muted playsinline preload="none" aria-label="A range of the B camera is marked in the source monitor and inserted at the playhead on the tracks its V1 and A1 selectors point to; later shots move right."></video>
+                        <video src="images/source.mp4" poster="images/source-poster.jpg" width="1200" height="846" muted playsinline preload="none" aria-label="A range of the B camera is marked in the source monitor and inserted at the playhead on the tracks its V1 and A1 patches point to; later shots move right."></video>
                     </div>
                     <button class="vtoggle" id="tabs-toggle" type="button" aria-label="Pause video"><svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 2h2.2v10H3.5zM8.3 2h2.2v10H8.3z" fill="currentColor"/></svg><svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg></button>
                 </div>
             </div>
+        </div>
+        <div class="tiles">
+            <figure class="tile reveal"><button class="zoom" type="button" data-full="images/edit-speed.jpg" aria-label="Enlarge: the Clip Speed / Duration dialog"><picture><source srcset="images/edit-speed.avif" type="image/avif"><img src="images/edit-speed.jpg" alt="The Clip Speed / Duration dialog: speed and linked duration, reverse speed, lock pitch and speed, audio type, time interpolation and ripple edit." width="1100" height="825" loading="lazy"></picture></button><figcaption><b>Speed/Duration</b> — <kbd>⌘R</kbd>, with the options Premiere has</figcaption></figure>
+            <figure class="tile reveal" style="--d:80ms"><button class="zoom" type="button" data-full="images/edit-fit.jpg" aria-label="Enlarge: the Fit Clip dialog"><picture><source srcset="images/edit-fit.avif" type="image/avif"><img src="images/edit-fit.jpg" alt="The Fit Clip dialog over the source and program monitors: change clip speed to fit, or ignore the source or sequence in or out point." width="900" height="675" loading="lazy"></picture></button><figcaption><b>Fit Clip</b> — four-point edits, when the source and the gap aren't the same length</figcaption></figure>
+            <figure class="tile reveal" style="--d:160ms"><button class="zoom" type="button" data-full="images/edit-props.jpg" aria-label="Enlarge: the Properties panel"><picture><source srcset="images/edit-props.avif" type="image/avif"><img src="images/edit-props.jpg" alt="The Properties panel for a clip: start, duration, source in and sync group, then Speed, Motion with keyframe buttons, and Opacity." width="1064" height="798" loading="lazy"></picture></button><figcaption><b>Properties</b> — speed, motion, opacity, color and level, each with keyframes</figcaption></figure>
+        </div>
+        <div class="more">
+            <div class="reveal"><b>Clip speed</b><span>Speed and duration, linked or not, reverse, frame blending, and pitch kept or locked. It plays, exports and goes to Premiere.</span></div>
+            <div class="reveal" style="--d:60ms"><b>Track targeting</b><span>Click a track name to target it. <kbd>Z</kbd> lifts the in/out range and <kbd>X</kbd> ripple cuts it on the targeted tracks.</span></div>
+            <div class="reveal" style="--d:120ms"><b>Keys editors know</b><span><kbd>T</kbd> marks the clip, <kbd>Q</kbd> and <kbd>W</kbd> go to in and out, <kbd>G</kbd> clears them, <kbd>P</kbd> is match frame, <kbd>+</kbd> and <kbd>−</kbd> zoom the panel you're in.</span></div>
+            <div class="reveal"><b>Panels in tabs</b><span>Project, Markers, Transcript, Source, Claude, Program and Properties sit in three tabbed panels. Drag tabs to reorder them.</span></div>
+            <div class="reveal" style="--d:60ms"><b>Sequence tabs</b><span>Open sequences sit in tabs above the timeline. <kbd>⌘F</kbd> searches the Project panel by name, metadata and marker notes.</span></div>
+            <div class="reveal" style="--d:120ms"><b>Monitors with rulers</b><span>Source and program each get a time ruler with zoom handles, the in/out range and every marker.</span></div>
         </div>
     </div>
 </section>
@@ -685,17 +692,17 @@ footer { padding: 64px 0 56px; border-top: 1px solid var(--line); margin-top: 40
                 <p class="eyebrow reveal"><span class="flag" style="--c:#4D8CFA"></span><span class="tc">04</span><span class="sep"></span>Color</p>
                 <h2 class="h2" id="color-h" data-split>Log in. <em>Graded out.</em></h2>
             </div>
-            <p class="lede reveal" style="--d:200ms">Give each camera its <code>.cube</code> LUT and every clip from it is graded, in the viewer, the source monitor and the export. Then fine-tune exposure, temperature, tint, contrast and saturation. In the run above, Claude found both LUTs in the folder and matched the angles.</p>
+            <p class="lede reveal" style="--d:200ms">Give each camera its <code>.cube</code> LUT and every clip from it is graded, in the viewer, the source monitor and the export. Then fine-tune exposure, temperature, tint, contrast and saturation, or ask Claude to find the LUTs and match the angles.</p>
         </div>
         <div class="frame compare reveal" id="compare">
-            <picture><source srcset="images/grade-lut.avif" type="image/avif"><img src="images/grade-lut.jpg" alt="The medium camera angle of Scott with its LUT applied: natural contrast and color." width="1920" height="1080" loading="lazy"></picture>
+            <picture><source srcset="images/grade-lut.avif" type="image/avif"><img src="images/grade-lut.jpg" alt="The medium camera angle with its LUT applied: natural contrast and color." width="1920" height="1080" loading="lazy"></picture>
             <picture class="before"><source srcset="images/grade-log.avif" type="image/avif"><img src="images/grade-log.jpg" alt="The same frame as shot in S-Log3: flat and washed out." width="1920" height="1080" loading="lazy"></picture>
             <span class="chip tl">S-Log3 · as shot</span>
             <span class="chip tr">B cam LUT</span>
             <input type="range" min="0" max="100" value="50" step="0.5" id="cmp" aria-label="Compare the log footage with the graded footage">
             <div class="handle"><div class="knob"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 5.5 3 10l4.5 4.5M12.5 5.5 17 10l-4.5 4.5" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
         </div>
-        <div class="hint"><span>Drag to compare</span><span>Scott interview · B cam, Sony S-Log3 → Rec. 709</span></div>
+        <div class="hint"><span>Drag to compare</span><span>B cam · Sony S-Log3 → Rec. 709</span></div>
     </div>
 </section>
 
@@ -704,7 +711,7 @@ footer { padding: 64px 0 56px; border-top: 1px solid var(--line); margin-top: 40
     <div class="wrap">
         <div class="split" style="align-items:end">
             <div class="ts reveal" id="ts" aria-label="Animated transcript panel: words light up as they're spoken, then a sentence is selected and added to the timeline">
-                <div class="ts-head" aria-hidden="true"><span>Claude</span><span>Properties</span><span>Markers</span><span class="on">Transcript</span></div>
+                <div class="ts-head" aria-hidden="true"><span>Project</span><span>Markers</span><span class="on">Transcript</span></div>
                 <div class="ts-search" aria-hidden="true"><svg viewBox="0 0 14 14"><circle cx="6" cy="6" r="4.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m9.2 9.2 3.3 3.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Search what was said</div>
                 <div class="ts-body" id="ts-body"></div>
                 <div class="ctx" id="ctx" aria-hidden="true"><div>Go to Sentence</div><div class="hi">Add to Timeline</div><hr><div>Copy Text</div></div>
@@ -743,7 +750,7 @@ footer { padding: 64px 0 56px; border-top: 1px solid var(--line); margin-top: 40
             <div class="reveal" style="--d:60ms"><b>Keyframes</b><span>Position, scale, rotation, opacity and level, carried to Premiere.</span></div>
             <div class="reveal" style="--d:120ms"><b>Dissolves and fades</b><span>Right-click a cut for a cross dissolve or crossfade, and drag to change its length.</span></div>
             <div class="reveal"><b>Proxies</b><span>Heavy 4K gets a 1080p proxy on import. Export always uses the originals.</span></div>
-            <div class="reveal" style="--d:60ms"><b>Bins and sequences</b><span>Nested bins and any number of sequences, so alternate cuts live side by side.</span></div>
+            <div class="reveal" style="--d:60ms"><b>Bins and versions</b><span>Nested bins and any number of sequences. Each new version keeps the last one in z_OLD CUTS.</span></div>
             <div class="reveal" style="--d:120ms"><b>Snapping and scrubbing</b><span>Snap with <kbd>S</kbd>, hear the audio as you drag with <kbd>⇧S</kbd>, and step frames with sound.</span></div>
         </div>
     </div>
@@ -872,6 +879,7 @@ footer { padding: 64px 0 56px; border-top: 1px solid var(--line); margin-top: 40
     </div>
 </footer>
 
+<dialog class="lb" id="lb" aria-label="Enlarged screenshot"><img id="lb-img" src="" alt=""><p id="lb-cap"></p><button class="close" type="button" aria-label="Close">×</button></dialog>
 <script>
 (() => {
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -932,7 +940,7 @@ if (st && !reduce) {
     });
     walk(st); sw = $$(".sw", st);
 }
-const CUT = 2778;   // frames in the Town Hall cut
+const CUT = 2623;   // frames in the demo cut (1:49:07)
 let ticking = false;
 const onScroll = () => {
     ticking = false;
@@ -994,149 +1002,19 @@ const cio = new IntersectionObserver((es) => es.forEach((e) => {
 }), { threshold: 0.6 });
 if (!reduce) $$("[data-count]").forEach((el) => { el.textContent = "0"; cio.observe(el); });
 
-// ---------- The agent replay ----------
+// ---------- Lightbox for the stills ----------
 (() => {
-    const root = $("#agent"); if (!root) return;
-    // The real Town Hall cut: [start, duration] in frames on V1 (A, B, A, …), the lower third on V2.
-    // The 0.3.0 hero run's cut (19 clips; the intro is two clips on the wide), its cameras and the lower third.
-    const V1 = [[0,111],[111,113],[224,188],[412,161],[573,204],[777,152],[929,155],[1084,189],[1273,181],[1454,80],[1534,122],[1656,143],[1799,177],[1976,106],[2082,146],[2228,201],[2429,80],[2509,144],[2653,125]];
-    const CAMS = "aababababababababab";
-    const V2 = [[0,224]];
-    const pct = (f) => (f / CUT * 100) + "%";
-    const ruler = $("#ruler"), lv1 = $("#lane-v1"), lv2 = $("#lane-v2"), la1 = $("#lane-a1");
-    [0, 30, 60, 90].forEach((s) => {
-        const sp = document.createElement("span"); sp.style.left = pct(s * 24000 / 1001); sp.textContent = tc(s * 24, 86400).slice(0, 8); ruler.append(sp);
-    });
-    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-    const wave = (n) => {
-        let d = ""; for (let i = 0; i < n; i++) { const h = 0.25 + rnd() * 0.75 * (0.5 + 0.5 * Math.sin(i * 0.9 + rnd() * 3)); const y = 50 - h * 46; d += `M${i * 4 + 1} ${y.toFixed(1)}V${(100 - y).toFixed(1)}`; }
-        return `<svg viewBox="0 0 ${n * 4} 100" preserveAspectRatio="none"><path d="${d}" stroke="#8CD9A6" stroke-width="2" opacity=".8"/></svg>`;
-    };
-    const mk = (lane, [s, d], cls, label) => {
-        const c = document.createElement("div"); c.className = "clip " + cls;
-        c.style.left = pct(s); c.style.width = `calc(${pct(d)} - 1px)`;
-        if (label) c.textContent = label;
-        lane.append(c); return c;
-    };
-    const v1 = V1.map((c, i) => mk(lv1, c, CAMS[i] === "b" ? "b" : "", CAMS[i] === "b" ? "B" : "A"));
-    const a1 = V1.map((c) => { const el = mk(la1, c, "au"); el.innerHTML = wave(Math.max(6, Math.round(c[1] / 6))) + '<span class="gain"></span>'; return el; });
-    const v2 = V2.map((c) => mk(lv2, c, "g", "L3"));
-    const chat = $("#chat"), ph = $("#ph"), tl = $("#tl"), undo = $("#undo");
-    const vimg = (k) => $(`#viewer [data-v="${k}"]`);
-    const show = (k, on) => vimg(k).classList.toggle("on", on);
-    const ro = { shots: $("#r-shots"), len: $("#r-len"), lufs: $("#r-lufs"), grade: $("#r-grade") };
-    const vtc = $("#vtc"), vempty = $("#vempty");
-    const PROMPT = "Build the Town Hall cut of this Scott interview. Sync the two cameras (A cam is the wide, B cam the medium) and use the cleanest mic channel. Open on the wide with his intro, then the part about Active Intelligence flagging churn and the weekly churn report, and finish with “I'm so upset with you” through “it's a game changer”. Every cut switches angle, shots around 8 s max. Grade with the LUTs, put the lower third over his intro, and set dialogue to −16 LUFS.";
-    let timers = [], raf = 0, run = 0;
-    const later = (ms, fn) => timers.push(setTimeout(fn, ms));
-    const scroll = () => chat.scrollTo({ top: chat.scrollHeight, behavior: reduce ? "auto" : "smooth" });
-    const add = (html, cls) => { const d = document.createElement("div"); d.className = cls; d.innerHTML = html; chat.append(d); scroll(); return d; };
-    const tool = (name, text, ms = 450) => { const d = add(`<span class="st"></span><code>${name}</code><span>${text}</span>`, "tool"); later(ms, () => d.classList.add("ok")); return d; };
-    const tween = (from, to, ms, fn, done) => {
-        const t0 = performance.now(), my = run;
-        const f = (now) => { if (my !== run) return; const k = Math.min(1, (now - t0) / ms), e = 1 - Math.pow(1 - k, 3); fn(from + (to - from) * e); if (k < 1) requestAnimationFrame(f); else if (done) done(); };
-        requestAnimationFrame(f);
-    };
-    const reset = () => {
-        run++; timers.forEach(clearTimeout); timers = []; cancelAnimationFrame(raf);
-        chat.innerHTML = ""; undo.classList.remove("show");
-        [...v1, ...a1, ...v2].forEach((c) => { c.classList.remove("in", "hit"); c.style.removeProperty("--amp"); c.style.removeProperty("--gy"); c.style.transitionDelay = ""; });
-        ["log", "a", "b", "l3"].forEach((k) => show(k, false)); vempty.style.opacity = 1;
-        ro.shots.textContent = "0"; ro.len.textContent = "0:00"; ro.lufs.textContent = "—"; ro.grade.textContent = "—";
-        Object.values(ro).forEach((b) => b.classList.remove("hot"));
-        ph.classList.remove("on"); ph.style.setProperty("--x", "0px"); vtc.textContent = tc(0); $("#viewer").classList.remove("playing");
-    };
-    const frameView = (f, graded) => {
-        const i = V1.findIndex(([s, d]) => f >= s && f < s + d);
-        const cam = CAMS[i] || "a";
-        show("a", graded && cam === "a"); show("b", graded && cam === "b"); show("log", !graded);
-        show("l3", V2.some(([s, d]) => f >= s && f < s + d));
-        vtc.textContent = tc(f);
-    };
-    const flash = (b) => { b.classList.add("hot"); later(900, () => b.classList.remove("hot")); };
-    const finalState = () => {
-        reset();
-        v1.concat(a1, v2).forEach((c) => c.classList.add("in"));
-        a1.forEach((c) => { c.style.setProperty("--amp", 0.85); c.style.setProperty("--gy", "22%"); });
-        vempty.style.opacity = 0; frameView(30, true);
-        ro.shots.textContent = "18"; ro.len.textContent = "1:55"; ro.lufs.innerHTML = "−17.1"; ro.grade.textContent = "2 LUTs";
-        add(PROMPT, "msg user");
-        add("The Town Hall cut is built: <b>1:55, 18 shots</b>, and every cut switches angle. Dialogue is at <b>−17.1 LUFS</b>, and the lower third sits lower-left, inside title-safe, with the intro kept on the wide.", "msg ai");
-        undo.classList.add("show"); ph.classList.add("on");
-    };
-    const play = () => {
-        reset();
-        const my = run;
-        // Type the request.
-        const u = add('<span class="tx"></span><span class="caret"></span>', "msg user"), tx = u.querySelector(".tx");
-        const t0 = performance.now(), cps = 260;
-        const type = (now) => {
-            if (my !== run) return;
-            const n = Math.min(PROMPT.length, Math.floor((now - t0) / 1000 * cps));
-            tx.textContent = PROMPT.slice(0, n);
-            if (n % 20 === 0) chat.scrollTop = chat.scrollHeight;
-            if (n < PROMPT.length) raf = requestAnimationFrame(type); else { u.querySelector(".caret").remove(); scroll(); }
-        };
-        raf = requestAnimationFrame(type);
-        const T = 2200;
-        later(T, () => tool("get_project", "Read the project", 300));
-        later(T + 450, () => tool("analyze_audio", "A cam: ch1 clips 292 times, ch2 is clean", 500));
-        later(T + 1050, () => tool("analyze_audio", "B cam", 400));
-        later(T + 1600, () => tool("sync_assets", "Synced 2 angles · B cam starts 2.73 s after A", 600));
-        later(T + 2350, () => tool("transcribe", "2,238 words, on device", 700));
-        later(T + 3150, () => tool("get_transcript", "Read 3 passages", 400));
-        later(T + 3700, () => {
-            tool("assemble", "Assembled 19 segments · 115.87 s", 1400);
-            vempty.style.opacity = 0; frameView(0, false);
-            v1.forEach((c, i) => { c.style.transitionDelay = i * 55 + "ms"; c.classList.add("in"); });
-            a1.forEach((c, i) => { c.style.transitionDelay = 120 + i * 55 + "ms"; c.classList.add("in"); });
-            tween(0, 18, 1300, (v) => ro.shots.textContent = Math.round(v));
-            tween(0, CUT, 1300, (v) => ro.len.textContent = mmss(v));
-        });
-        later(T + 5300, () => {
-            tool("review_cuts", "Reviewed 19 clips", 1300);
-            v1.forEach((c, i) => { c.style.transitionDelay = ""; if (i < V1.length - 1) later(i * 60, () => { c.classList.add("hit"); later(380, () => c.classList.remove("hit")); }); });
-        });
-        later(T + 6700, () => add("The cut reads cleanly at every join. Next I'll apply the LUTs and check the lower third's timing.", "msg ai"));
-        later(T + 7300, () => tool("render_frames", "Rendered 5 frames to check", 500));
-        later(T + 7900, () => { tool("add_clip", "Lower third on V2, lower-left at 1.3×, trimmed to the intro", 400); v2.forEach((c, i) => { c.style.transitionDelay = i * 120 + "ms"; c.classList.add("in"); }); frameView(30, false); });
-        later(T + 8600, () => {
-            tool("set_color", "A cam: A_wide_CLog3-709 · B cam: B_medium_SLog3-709", 500);
-            frameView(30, true); ro.grade.textContent = "2 LUTs"; flash(ro.grade);
-        });
-        later(T + 9300, () => { tool("measure_loudness", "Mix −39.8 LUFS (19 clips)", 400); ro.lufs.textContent = "−39.8"; flash(ro.lufs); });
-        later(T + 9900, () => add("Dialogue is sitting around −40 LUFS (ch2 is the −10 dB safety track), so it needs about +24 dB. I'm setting each clip's gain toward −16 LUFS.", "msg ai"));
-        later(T + 10700, () => {
-            tool("update_clips", "Clip gain on 19 clips, +18 to +29 dB", 1200);
-            a1.forEach((c, i) => later(i * 50, () => { c.style.setProperty("--amp", 0.85); c.style.setProperty("--gy", "22%"); }));
-            tween(-39.8, -17.1, 1600, (v) => ro.lufs.textContent = "−" + Math.abs(v).toFixed(1), () => flash(ro.lufs));
-        });
-        later(T + 12400, () => tool("measure_loudness", "Mix −17.1 LUFS · peaks −1.2 dBFS", 400));
-        later(T + 13000, () => {
-            add("The Town Hall cut is built: <b>1:55, 18 shots</b>, and every cut switches angle. Dialogue is at <b>−17.1 LUFS</b>, and the lower third sits lower-left, inside title-safe, with the intro kept on the wide.", "msg ai");
-            undo.classList.add("show");
-        });
-        // Then play the cut across the timeline.
-        later(T + 13600, () => {
-            ph.classList.add("on"); $("#viewer").classList.add("playing");
-            const lane = lv1, start = performance.now(), dur = 9000;
-            const go = (now) => {
-                if (my !== run) return;
-                const k = Math.min(1, (now - start) / dur), f = k * (CUT - 1);
-                ph.style.setProperty("--x", (k * lane.clientWidth) + "px");
-                frameView(f, true);
-                if (k < 1) raf = requestAnimationFrame(go);
-                else later(400, () => { ph.style.setProperty("--x", "0px"); frameView(30, true); $("#viewer").classList.remove("playing"); });
-            };
-            raf = requestAnimationFrame(go);
-        });
-    };
-    $("#replay").addEventListener("click", () => reduce ? finalState() : play());
-    if (reduce) { finalState(); return; }
-    let started = false;
-    new IntersectionObserver((es, o) => es.forEach((e) => {
-        if (e.isIntersecting && !started) { started = true; o.disconnect(); setTimeout(play, 300); }
-    }), { threshold: 0.45 }).observe(root);
+    const lb = $("#lb"), img = $("#lb-img"), cap = $("#lb-cap"); if (!lb || !lb.showModal) return;
+    let from = null;
+    $$(".zoom").forEach((b) => b.addEventListener("click", () => {
+        const pic = b.querySelector("img"), fig = b.closest("figure");
+        img.src = b.dataset.full; img.alt = pic.alt;
+        cap.textContent = fig?.querySelector("figcaption")?.textContent.trim() ?? "";
+        from = b; lb.showModal(); lb.querySelector(".close").focus();
+    }));
+    lb.querySelector(".close").addEventListener("click", () => lb.close());
+    lb.addEventListener("click", (e) => { if (e.target === lb) lb.close(); });
+    lb.addEventListener("close", () => { from?.focus(); });
 })();
 
 // ---------- Tabs with videos that advance on their own ----------
